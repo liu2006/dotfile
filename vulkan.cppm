@@ -21,7 +21,7 @@ const std::vector<const char *> validationLayers{"VK_LAYER_KHRONOS_validation"};
 export class SDLGuard
 {
 private:
-    SDL_Window* window;
+    SDL_Window *window;
     SDL_Event event;
     bool running{true};
     void mainLoop()
@@ -39,7 +39,9 @@ private:
             }
         }
     }
+
 public:
+    SDL_Window *getWindow() { return window; }
     SDLGuard()
     {
         if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -69,10 +71,12 @@ export class VulkanGuard
 {
     friend class Instance;
     friend class DebugMessenger;
+    friend class Surface;
 private:
     vk::raii::Context context;
     vk::raii::Instance instance{nullptr};
     vk::raii::DebugUtilsMessengerEXT debugMessenger{nullptr};
+    vk::raii::SurfaceKHR surface{nullptr};
 public:    
     VulkanGuard() = default;
     VulkanGuard(const VulkanGuard &) = delete;
@@ -177,4 +181,21 @@ public:
     ~DebugMessenger() = default;
 };
 
-
+export class Surface
+{
+private:
+    VkSurfaceKHR _surface;
+public:
+    Surface(VulkanGuard *vulkan, SDL_Window *window)
+    {
+        if (!SDL_Vulkan_CreateSurface(window, *vulkan->instance, nullptr,
+                                     &_surface)) {
+            throw std::runtime_error("Could not create surface");
+        }
+        vulkan->surface = vk::raii::SurfaceKHR{vulkan->instance, _surface};
+    }
+    
+    Surface(const Surface &) = delete;
+    Surface &operator=(const Surface &) = delete;
+    ~Surface() = default;
+};
