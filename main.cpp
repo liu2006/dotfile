@@ -20,6 +20,7 @@ int main()
         auto vulkan = std::make_unique<VulkanGuard>();
         {
             initStep<Instance>(vulkan.get());
+            initStep<DebugMessenger>(vulkan.get());
         }
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> duration{end - start};

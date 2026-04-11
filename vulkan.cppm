@@ -1,4 +1,5 @@
 module;
+#include <iostream>
 #include <SDL3/SDL_vulkan.h>
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
@@ -67,10 +68,11 @@ public:
 export class VulkanGuard
 {
     friend class Instance;
+    friend class DebugMessenger;
 private:
     vk::raii::Context context;
     vk::raii::Instance instance{nullptr};
-    
+    vk::raii::DebugUtilsMessengerEXT debugMessenger{nullptr};
 public:    
     VulkanGuard() = default;
     VulkanGuard(const VulkanGuard &) = delete;
@@ -91,7 +93,7 @@ private:
     std::vector<vk::ExtensionProperties> extensionProperties{};
     
 public:
-    Instance(VulkanGuard *vulkan)
+    explicit Instance(VulkanGuard *vulkan)
         : layerProperties{vulkan->context.enumerateInstanceLayerProperties()},
           extensionProperties(
               vulkan->context.enumerateInstanceExtensionProperties())
@@ -135,3 +137,44 @@ public:
     Instance &operator=(const Instance &) = delete;
     ~Instance() = default;
 };
+
+export class DebugMessenger
+{
+private:
+    static VKAPI_ATTR vk::Bool32 VKAPI_CALL
+    debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
+                  vk::DebugUtilsMessageTypeFlagsEXT type,
+                  const vk::DebugUtilsMessengerCallbackDataEXT *pCallbackData,
+                  void *pUserData)
+    {
+        if (severity >= vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning)
+            std::cout << std::format("validation layer: {}\n",
+                                     pCallbackData->pMessage);
+        return vk::False;
+    }
+    vk::DebugUtilsMessageSeverityFlagsEXT severityFlags{
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose};
+    vk::DebugUtilsMessageTypeFlagsEXT typeFlags{
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+        vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral};
+
+public:
+    DebugMessenger(VulkanGuard *vulkan)
+    {
+        if (!enableValidationLayers)
+            return;
+        vk::DebugUtilsMessengerCreateInfoEXT debugInfo{
+            .messageSeverity = severityFlags,
+            .messageType = typeFlags,
+            .pfnUserCallback = &debugCallback};
+        vulkan->debugMessenger = vk::raii::DebugUtilsMessengerEXT{vulkan->instance, debugInfo};
+    }
+    DebugMessenger(const DebugMessenger &) = delete;
+    DebugMessenger &operator=(const DebugMessenger &) = delete;
+    ~DebugMessenger() = default;
+};
+
+
