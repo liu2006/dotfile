@@ -1,13 +1,12 @@
 module;
-#include <iostream>
+#include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
+#include <iostream>
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
-#include <SDL3/SDL.h>
 export module initVulkan;
 
-constexpr bool enableValidationLayers
-{
+constexpr bool enableValidationLayers{
 #ifdef NDEBUG
     false
 #else
@@ -17,6 +16,7 @@ constexpr bool enableValidationLayers
 constexpr uint32_t WIDTH{1920};
 constexpr uint32_t HEIGHT{1080};
 const std::vector<const char *> validationLayers{"VK_LAYER_KHRONOS_validation"};
+const std::vector<const char *> deviceExtensions{vk::KHRSwapchainExtensionName};
 
 export class SDLGuard
 {
@@ -31,7 +31,7 @@ private:
             while (SDL_PollEvent(&event)) {
                 switch (event.type) {
                 case SDL_EVENT_QUIT:
-                    running = false; 
+                    running = false;
                     break;
                 default:
                     break;
@@ -45,7 +45,8 @@ public:
     SDLGuard()
     {
         if (!SDL_Init(SDL_INIT_VIDEO)) {
-            throw std::runtime_error(std::format("Could not initialize SDL: {}\n", SDL_GetError()));
+            throw std::runtime_error(
+                std::format("Could not initialize SDL: {}\n", SDL_GetError()));
         }
         window = SDL_CreateWindow("vulkan", WIDTH, HEIGHT,
                                   SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE |
@@ -72,19 +73,22 @@ export class VulkanGuard
     friend class Instance;
     friend class DebugMessenger;
     friend class Surface;
+    friend class PhysicalDevice;
+
 private:
     vk::raii::Context context;
     vk::raii::Instance instance{nullptr};
     vk::raii::DebugUtilsMessengerEXT debugMessenger{nullptr};
     vk::raii::SurfaceKHR surface{nullptr};
-public:    
+
+public:
     VulkanGuard() = default;
     VulkanGuard(const VulkanGuard &) = delete;
     VulkanGuard &operator=(const VulkanGuard &) = delete;
-    ~VulkanGuard() = default; 
+    ~VulkanGuard() = default;
 };
 
-export class Instance 
+export class Instance
 {
 private:
     std::vector<const char *> layers{};
@@ -95,7 +99,7 @@ private:
     std::vector<const char *> extensions{sdlExtensions,
                                          sdlExtensions + sdlExtensionCount};
     std::vector<vk::ExtensionProperties> extensionProperties{};
-    
+
 public:
     explicit Instance(VulkanGuard *vulkan)
         : layerProperties{vulkan->context.enumerateInstanceLayerProperties()},
@@ -166,7 +170,7 @@ private:
         vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral};
 
 public:
-    DebugMessenger(VulkanGuard *vulkan)
+    explicit DebugMessenger(VulkanGuard *vulkan)
     {
         if (!enableValidationLayers)
             return;
@@ -174,7 +178,8 @@ public:
             .messageSeverity = severityFlags,
             .messageType = typeFlags,
             .pfnUserCallback = &debugCallback};
-        vulkan->debugMessenger = vk::raii::DebugUtilsMessengerEXT{vulkan->instance, debugInfo};
+        vulkan->debugMessenger =
+            vk::raii::DebugUtilsMessengerEXT{vulkan->instance, debugInfo};
     }
     DebugMessenger(const DebugMessenger &) = delete;
     DebugMessenger &operator=(const DebugMessenger &) = delete;
@@ -185,17 +190,78 @@ export class Surface
 {
 private:
     VkSurfaceKHR _surface;
+
 public:
     Surface(VulkanGuard *vulkan, SDL_Window *window)
     {
         if (!SDL_Vulkan_CreateSurface(window, *vulkan->instance, nullptr,
-                                     &_surface)) {
+                                      &_surface)) {
             throw std::runtime_error("Could not create surface");
         }
         vulkan->surface = vk::raii::SurfaceKHR{vulkan->instance, _surface};
     }
-    
     Surface(const Surface &) = delete;
     Surface &operator=(const Surface &) = delete;
     ~Surface() = default;
+};
+
+export class PhysicalDevice
+{
+private:
+    std::vector<vk::raii::PhysicalDevice> physicalDevices{};
+    bool supportVulkan13{};
+    bool supportGraphics{};
+    bool supportExtensions{};
+    bool supportFeatures{};
+public:
+    explicit PhysicalDevice(VulkanGuard *vulkan)
+        : physicalDevices{vulkan->instance.enumeratePhysicalDevices()}
+    {
+        if (physicalDevices.empty())
+            throw std::runtime_error("GPU not present");
+        auto devIter = std::ranges::find_if(
+            physicalDevices, [&](const auto &physicalDevice) {
+                supportVulkan13 = physicalDevice.getProperties().apiVersion >=
+                                  vk::ApiVersion13;
+                supportGraphics = std::ranges::any_of(
+                    queueFamilyProperties, [](const auto &qfp) {
+                        return !!(qfp.queueFlags &
+                                  vk::QueueFlagBits::eGraphics);
+                    });
+                auto extensionProperties =
+                    physicalDevice.enumerateDeviceExtensionProperties();
+                supportExtensions = std::ranges::all_of(
+                    deviceExtensions,
+                    [&extensionProperties](const auto &extension) {
+                        return std::ranges::any_of(
+                            extensionProperties,
+                            [extension](const auto &extensionProperty) {
+                                return std::strcmp(
+                                           extensionProperty.extensionName,
+                                           extension) == 0;
+                            });
+                    });
+                auto features = physicalDevice.template getFeatures2<
+                    vk::PhysicalDeviceFeatures2,
+                    vk::PhysicalDeviceVulkan11Features,
+                    vk::PhysicalDeviceVulkan13Features,
+                    vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>();
+                supportFeatures =
+                    features.template get<vk::PhysicalDeviceVulkan11Features>()
+                        .shaderDrawParameters &&
+                    features.template get<vk::PhysicalDeviceVulkan13Features>()
+                        .dynamicRendering &&
+                    features.template get<vk::PhysicalDeviceVulkan13Features>()
+                        .synchronization2 &&
+                    features
+                        .template get<
+                            vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>()
+                        .extendedDynamicState;
+                return supportVulkan13 && supportGraphics &&
+                       supportExtensions && supportFeatures;
+            });
+    }
+    PhysicalDevice(const PhysicalDevice &) = delete;
+    PhysicalDevice &operator=(const PhysicalDevice &) = delete;
+    ~PhysicalDevice() = default;
 };

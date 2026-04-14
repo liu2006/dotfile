@@ -22,6 +22,7 @@ int main()
             initStep<Instance>(vulkan.get());
             initStep<DebugMessenger>(vulkan.get());
             initStep<Surface>(vulkan.get(), sdl->getWindow());
+            initStep<PhysicalDevice>(vulkan.get());
         }
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> duration{end - start};
