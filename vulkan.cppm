@@ -65,6 +65,7 @@ export class Vulkan
     friend class Surface;
     friend class PhysicalDevice;
     friend class Device;
+    friend class SwapChain;
 
 private:
     vk::raii::Context context;
@@ -74,6 +75,9 @@ private:
     vk::raii::PhysicalDevice physicalDevice{nullptr};
     vk::raii::Device device{nullptr};
     vk::raii::Queue graphicsQueue{nullptr};
+    vk::raii::SwapchainKHR swapChain{nullptr};
+    std::vector<vk::Image> swapChainImages;
+    std::vector<vk::raii::ImageView> swapChainImageViews;
 
 public:
     Vulkan() = default;
@@ -257,7 +261,10 @@ public:
 };
 export class Device
 {
+private:
     float queuePriority{0.5f};
+    
+public:
     explicit Device(Vulkan *vulkan)
     {
         std::vector<vk::QueueFamilyProperties> queueFamilyProperties{
@@ -290,4 +297,92 @@ export class Device
     ~Device() = default;
     Device(const Device &) = delete;
     Device &operator=(const Device &) = delete;
+};
+
+export class SwapChain
+{
+private:
+    vk::SurfaceCapabilitiesKHR surfaceCapabilities;
+    std::vector<vk::SurfaceFormatKHR> availableFormats;
+    std::vector<vk::PresentModeKHR> availablePresentModes;
+    int width{}, height{};
+    uint32_t minImageCount;
+public:
+    SwapChain(Vulkan *vulkan, SDL_Window *window)
+        : surfaceCapabilities{
+              vulkan->physicalDevice.getSurfaceCapabilitiesKHR(vulkan->surface)},
+          availableFormats{vulkan->physicalDevice.getSurfaceFormatsKHR(vulkan->surface)},
+          availablePresentModes{
+              vulkan->physicalDevice.getSurfacePresentModesKHR(vulkan->surface)},
+          minImageCount{std::max(3u, surfaceCapabilities.minImageCount)}
+    {
+        auto swapChainFormat =
+            [&]() {
+                if (availableFormats.empty())
+                    throw std::runtime_error("Could not suitable surface format");
+                auto format = std::ranges::find_if(availableFormats, [](const auto &format) {
+                    return format.format == vk::Format::eB8G8R8Srgb &&
+                           format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+                });
+                return (format != availableFormats.end()) ? *format : availableFormats[0];
+            }();
+        auto swapChainPresentMode = [&]() {
+            if (std::ranges::none_of(availablePresentModes, [](const auto &presentMode) {
+                    return presentMode == vk::PresentModeKHR::eFifo;
+                })) {
+                throw std::runtime_error("Could not find suitable surface present mode");
+            }
+            auto presentMode =
+                std::ranges::find_if(availablePresentModes, [](const auto &presentMode) {
+                    return presentMode == vk::PresentModeKHR::eMailbox;
+                });
+            return (presentMode != availablePresentModes.end()) ? *presentMode
+                                                                : vk::PresentModeKHR::eFifo;
+        }();
+        auto swapChainExtent = [this, window]() {
+            if (this->surfaceCapabilities.currentExtent.width != UINT32_MAX) {
+                return this->surfaceCapabilities.currentExtent;
+            }
+            SDL_GetWindowSizeInPixels(window, &width, &height);
+            return vk::Extent2D{
+                std::clamp<uint32_t>(width, this->surfaceCapabilities.minImageExtent.width,
+                                     this->surfaceCapabilities.maxImageExtent.width),
+                std::clamp<uint32_t>(height, this->surfaceCapabilities.minImageExtent.height,
+                                     this->surfaceCapabilities.maxImageExtent.height)};
+        }();
+        auto swapChainMinImageCount = [this]() {
+            if (minImageCount > this->surfaceCapabilities.maxImageCount &&
+                this->surfaceCapabilities.maxImageCount > 0) {
+                minImageCount = this->surfaceCapabilities.maxImageCount;
+            }
+            return minImageCount;
+        }();
+        vk::SwapchainCreateInfoKHR swapChainInfo{
+            .surface = vulkan->surface,
+            .minImageCount = swapChainMinImageCount,
+            .imageFormat = swapChainFormat.format,
+            .imageColorSpace = swapChainFormat.colorSpace,
+            .imageExtent = swapChainExtent,
+            .imageArrayLayers = 1,
+            .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
+            .imageSharingMode = vk::SharingMode::eExclusive,
+            .preTransform = surfaceCapabilities.currentTransform,
+            .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
+            .presentMode = swapChainPresentMode,
+            .clipped = true};
+        vulkan->swapChain = vk::raii::SwapchainKHR{vulkan->device, swapChainInfo};
+        vulkan->swapChainImages = vulkan->swapChain.getImages();
+        vk::ImageViewCreateInfo imageViewInfo{
+            .viewType = vk::ImageViewType::e2D,
+            .format = swapChainFormat.format,
+            .subresourceRange = {vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1},
+        };
+        for (auto &image : vulkan->swapChainImages) {
+            imageViewInfo.image = image;
+            vulkan->swapChainImageViews.emplace_back(vulkan->device, imageViewInfo);
+        }
+    }
+    ~SwapChain() = default;
+    SwapChain(const SwapChain &) = delete;
+    SwapChain &operator=(const SwapChain &) = delete;
 };
