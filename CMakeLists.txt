@@ -5,13 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(SDL3_ROOT $ENV{HOME}/vendor/sdl3)
 set(Vulkan_ROOT $ENV{HOME}/vendor/1.4.341.1/x86_64)
-find_package(SDL3 CONFIG REQUIRED)
+set(SDL3_ROOT $ENV{HOME}/vendor/sdl3)
 find_package(Vulkan REQUIRED)
-
-add_executable(${PROJECT_NAME})
-target_sources(${PROJECT_NAME} PRIVATE main.cpp)
+find_package(SDL3 CONFIG REQUIRED)
 
 add_library(VulkanModule SHARED)
 target_sources(VulkanModule
@@ -26,11 +23,9 @@ target_compile_definitions(VulkanModule
     VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
 )
 
+add_executable(${PROJECT_NAME})
+target_sources(${PROJECT_NAME} PRIVATE main.cpp)
+
 target_link_libraries(VulkanModule PUBLIC SDL3::SDL3 Vulkan::Vulkan)
 target_link_libraries(${PROJECT_NAME} PRIVATE VulkanModule)
-
-install(TARGETS VulkanModule ${PROJECT_NAME}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
 

@@ -1,9 +1,6 @@
 #include <iostream>
-#include <cstdlib>
 #include <chrono>
 #include <memory>
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_vulkan.h>
 import initVulkan;
 
 template <typename T, typename... Types>
@@ -14,10 +11,10 @@ void initStep(Types &&...args)
 
 int main()
 {
-    try {    
+    try {
         auto start = std::chrono::steady_clock::now();
         auto sdl = std::make_unique<SDLGuard>();
-        auto vulkan = std::make_unique<VulkanGuard>();
+        auto vulkan = std::make_unique<Vulkan>();
         {
             initStep<Instance>(vulkan.get());
             initStep<DebugMessenger>(vulkan.get());
@@ -32,9 +29,5 @@ int main()
         std::cerr << err.what() << std::endl;
         return EXIT_FAILURE;
     }
-    
     return EXIT_SUCCESS;
 }
-
-
- 

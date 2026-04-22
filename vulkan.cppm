@@ -2,10 +2,11 @@ module;
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include <iostream>
-#include <memory>
 #include <vulkan/vulkan_raii.hpp>
 export module initVulkan;
-
+const std::vector<const char *> validationLayers{"VK_LAYER_KHRONOS_validation"};
+const std::vector<const char *> requiredDeviceExtensions{
+    vk::KHRSwapchainExtensionName};
 constexpr bool enableValidationLayers{
 #ifdef NDEBUG
     false
@@ -13,15 +14,14 @@ constexpr bool enableValidationLayers{
     true
 #endif
 };
-constexpr uint32_t WIDTH{1920};
-constexpr uint32_t HEIGHT{1080};
-const std::vector<const char *> validationLayers{"VK_LAYER_KHRONOS_validation"};
-const std::vector<const char *> deviceExtensions{vk::KHRSwapchainExtensionName};
 
 export class SDLGuard
 {
 private:
     SDL_Window *window;
+    uint32_t width{1920};
+    uint32_t height{1080};
+    const char *title{"vulkan"};
     SDL_Event event;
     bool running{true};
     void mainLoop()
@@ -41,39 +41,32 @@ private:
     }
 
 public:
-    SDL_Window *getWindow() { return window; }
+    SDL_Window *getWindow() { return window; };
+    void run() { mainLoop(); }
     SDLGuard()
     {
-        if (!SDL_Init(SDL_INIT_VIDEO)) {
-            throw std::runtime_error(
-                std::format("Could not initialize SDL: {}\n", SDL_GetError()));
-        }
-        window = SDL_CreateWindow("vulkan", WIDTH, HEIGHT,
-                                  SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE |
-                                      SDL_WINDOW_HIDDEN);
-        if (!window) {
-            throw std::runtime_error(
-                std::format("Could not create window: {}\n", SDL_GetError()));
-        }
+        SDL_Init(SDL_INIT_VIDEO);
+        window = SDL_CreateWindow(title, width, height,
+                                  SDL_WINDOW_VULKAN | SDL_WINDOW_HIDDEN);
     }
-    void run() { mainLoop(); }
-    SDLGuard(const SDLGuard &) = delete;
-    SDLGuard &operator=(const SDLGuard &) = delete;
-    SDLGuard(SDLGuard &&) = delete;
-    SDLGuard &operator=(SDLGuard &&) = delete;
     ~SDLGuard()
     {
         SDL_DestroyWindow(window);
         SDL_Quit();
     }
+    SDLGuard(const SDLGuard &) = delete;
+    SDLGuard &operator=(const SDLGuard &) = delete;
+    SDLGuard(SDLGuard &&) = delete;
+    SDLGuard &operator=(SDLGuard &&) = delete;
 };
 
-export class VulkanGuard
+export class Vulkan
 {
     friend class Instance;
     friend class DebugMessenger;
     friend class Surface;
     friend class PhysicalDevice;
+    friend class Device;
 
 private:
     vk::raii::Context context;
@@ -82,29 +75,29 @@ private:
     vk::raii::SurfaceKHR surface{nullptr};
 
 public:
-    VulkanGuard() = default;
-    VulkanGuard(const VulkanGuard &) = delete;
-    VulkanGuard &operator=(const VulkanGuard &) = delete;
-    ~VulkanGuard() = default;
+    Vulkan() = default;
+    ~Vulkan() = default;
+    Vulkan(const Vulkan &) = delete;
+    Vulkan &operator=(const Vulkan &) = delete;
 };
 
 export class Instance
 {
 private:
-    std::vector<const char *> layers{};
-    std::vector<vk::LayerProperties> layerProperties{};
     uint32_t sdlExtensionCount{};
     char const *const *sdlExtensions{
         SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount)};
     std::vector<const char *> extensions{sdlExtensions,
                                          sdlExtensions + sdlExtensionCount};
-    std::vector<vk::ExtensionProperties> extensionProperties{};
+    std::vector<vk::ExtensionProperties> extensionProperties;
+    std::vector<const char *> layers;
+    std::vector<vk::LayerProperties> layerProperties;
 
 public:
-    explicit Instance(VulkanGuard *vulkan)
-        : layerProperties{vulkan->context.enumerateInstanceLayerProperties()},
-          extensionProperties(
-              vulkan->context.enumerateInstanceExtensionProperties())
+    explicit Instance(Vulkan *vulkan)
+        : extensionProperties{
+              vulkan->context.enumerateInstanceExtensionProperties()},
+          layerProperties{vulkan->context.enumerateInstanceLayerProperties()}
     {
         vk::ApplicationInfo appInfo{.pApplicationName = "Vulkan",
                                     .applicationVersion =
@@ -113,19 +106,8 @@ public:
                                     .engineVersion = VK_MAKE_VERSION(1, 0, 0),
                                     .apiVersion = vk::ApiVersion14};
         if (enableValidationLayers) {
-            layers.assign(validationLayers.begin(), validationLayers.end());
             extensions.push_back(vk::EXTDebugUtilsExtensionName);
-        }
-        auto unsupportedLayer =
-            std::ranges::find_if(layers, [this](const auto &layer) {
-                return std::ranges::none_of(
-                    this->layerProperties, [layer](const auto &layerProperty) {
-                        return std::strcmp(layerProperty.layerName, layer) == 0;
-                    });
-            });
-        if (unsupportedLayer != layers.end()) {
-            throw std::runtime_error(std::format(
-                "required layer not supported: {}", *unsupportedLayer));
+            layers.assign(validationLayers.begin(), validationLayers.end());
         }
         auto unsupportedExtension =
             std::ranges::find_if(extensions, [this](const auto &extension) {
@@ -138,12 +120,30 @@ public:
             });
         if (unsupportedExtension != extensions.end()) {
             throw std::runtime_error(std::format(
-                "required extension not supported: {}", *unsupportedExtension));
+                "Required extension not supported: {}", *unsupportedExtension));
         }
+        auto unsupportedLayer =
+            std::ranges::find_if(layers, [this](const auto &layer) {
+                return std::ranges::none_of(
+                    this->layerProperties, [layer](const auto &layerProperty) {
+                        return std::strcmp(layerProperty.layerName, layer) == 0;
+                    });
+            });
+        if (unsupportedLayer != layers.end()) {
+            throw std::runtime_error(std::format(
+                "Required layer not supported: {}", *unsupportedLayer));
+        }
+        vk::InstanceCreateInfo instanceInfo{
+            .pApplicationInfo = &appInfo,
+            .enabledLayerCount = static_cast<uint32_t>(layers.size()),
+            .ppEnabledLayerNames = layers.data(),
+            .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+            .ppEnabledExtensionNames = extensions.data()};
+        vulkan->instance = vk::raii::Instance{vulkan->context, instanceInfo};
     }
+    ~Instance() = default;
     Instance(const Instance &) = delete;
     Instance &operator=(const Instance &) = delete;
-    ~Instance() = default;
 };
 
 export class DebugMessenger
@@ -155,35 +155,38 @@ private:
                   const vk::DebugUtilsMessengerCallbackDataEXT *pCallbackData,
                   void *pUserData)
     {
-        if (severity >= vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning)
-            std::cout << std::format("validation layer: {}\n",
-                                     pCallbackData->pMessage);
+        if (severity >= vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning) {
+            std::cerr << std::format("Validation layer type: {}, message: {}\n",
+                                     to_string(type), pCallbackData->pMessage);
+        }
         return vk::False;
     }
-    vk::DebugUtilsMessageSeverityFlagsEXT severityFlags{
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose};
-    vk::DebugUtilsMessageTypeFlagsEXT typeFlags{
-        vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-        vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral};
 
 public:
-    explicit DebugMessenger(VulkanGuard *vulkan)
+    explicit DebugMessenger(Vulkan *vulkan)
     {
-        if (!enableValidationLayers)
+        if (enableValidationLayers)
             return;
+        vk::DebugUtilsMessageSeverityFlagsEXT severityFlags{
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eError |
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose};
+        vk::DebugUtilsMessageTypeFlagsEXT typeFlags{
+            vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+            vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+            vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance};
         vk::DebugUtilsMessengerCreateInfoEXT debugInfo{
             .messageSeverity = severityFlags,
             .messageType = typeFlags,
-            .pfnUserCallback = &debugCallback};
+            .pfnUserCallback = &debugCallback,
+        };
         vulkan->debugMessenger =
             vk::raii::DebugUtilsMessengerEXT{vulkan->instance, debugInfo};
     }
+
+    ~DebugMessenger() = default;
     DebugMessenger(const DebugMessenger &) = delete;
     DebugMessenger &operator=(const DebugMessenger &) = delete;
-    ~DebugMessenger() = default;
 };
 
 export class Surface
@@ -192,53 +195,59 @@ private:
     VkSurfaceKHR _surface;
 
 public:
-    Surface(VulkanGuard *vulkan, SDL_Window *window)
+    Surface(Vulkan *vulkan, SDL_Window *window)
     {
         if (!SDL_Vulkan_CreateSurface(window, *vulkan->instance, nullptr,
                                       &_surface)) {
-            throw std::runtime_error("Could not create surface");
+            throw std::runtime_error("Could not create vulkan surface");
         }
         vulkan->surface = vk::raii::SurfaceKHR{vulkan->instance, _surface};
     }
+    ~Surface() = default;
     Surface(const Surface &) = delete;
     Surface &operator=(const Surface &) = delete;
-    ~Surface() = default;
 };
 
 export class PhysicalDevice
 {
 private:
-    std::vector<vk::raii::PhysicalDevice> physicalDevices{};
-    bool supportVulkan13{};
-    bool supportGraphics{};
-    bool supportExtensions{};
-    bool supportFeatures{};
+    std::vector<vk::raii::PhysicalDevice> physicalDevices;
+    bool supportVulkan13;
+    bool supportGraphics;
+    bool supportDeviceExtensions;
+    bool supportFeatures;
+
 public:
-    explicit PhysicalDevice(VulkanGuard *vulkan)
+    explicit PhysicalDevice(Vulkan *vulkan)
         : physicalDevices{vulkan->instance.enumeratePhysicalDevices()}
     {
         if (physicalDevices.empty())
-            throw std::runtime_error("GPU not present");
-        auto devIter = std::ranges::find_if(
+            throw std::runtime_error("Could not find physical device");
+        auto physicalDevice = std::ranges::find_if(
             physicalDevices, [&](const auto &physicalDevice) {
                 supportVulkan13 = physicalDevice.getProperties().apiVersion >=
                                   vk::ApiVersion13;
+                auto queueFamilyProperties =
+                    physicalDevice.getQueueFamilyProperties();
                 supportGraphics = std::ranges::any_of(
                     queueFamilyProperties, [](const auto &qfp) {
                         return !!(qfp.queueFlags &
                                   vk::QueueFlagBits::eGraphics);
                     });
-                auto extensionProperties =
+                auto availableDeviceExtensions =
                     physicalDevice.enumerateDeviceExtensionProperties();
-                supportExtensions = std::ranges::all_of(
-                    deviceExtensions,
-                    [&extensionProperties](const auto &extension) {
+                supportDeviceExtensions = std::ranges::all_of(
+                    requiredDeviceExtensions,
+                    [&availableDeviceExtensions](
+                        const auto &requiredDeviceExtension) {
                         return std::ranges::any_of(
-                            extensionProperties,
-                            [extension](const auto &extensionProperty) {
-                                return std::strcmp(
-                                           extensionProperty.extensionName,
-                                           extension) == 0;
+                            availableDeviceExtensions,
+                            [requiredDeviceExtension](
+                                const auto &availableDeviceExtension) {
+                                return std::strcmp(availableDeviceExtension
+                                                       .extensionName,
+                                                   requiredDeviceExtension) ==
+                                       0;
                             });
                     });
                 auto features = physicalDevice.template getFeatures2<
@@ -251,17 +260,18 @@ public:
                         .shaderDrawParameters &&
                     features.template get<vk::PhysicalDeviceVulkan13Features>()
                         .dynamicRendering &&
-                    features.template get<vk::PhysicalDeviceVulkan13Features>()
-                        .synchronization2 &&
                     features
                         .template get<
                             vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>()
                         .extendedDynamicState;
                 return supportVulkan13 && supportGraphics &&
-                       supportExtensions && supportFeatures;
+                       supportDeviceExtensions && supportFeatures;
             });
     }
+    ~PhysicalDevice() = default;
     PhysicalDevice(const PhysicalDevice &) = delete;
     PhysicalDevice &operator=(const PhysicalDevice &) = delete;
-    ~PhysicalDevice() = default;
+};
+export class Device
+{
 };
