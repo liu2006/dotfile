@@ -73,7 +73,10 @@ private:
     vk::raii::Instance instance{nullptr};
     vk::raii::DebugUtilsMessengerEXT debugMessenger{nullptr};
     vk::raii::SurfaceKHR surface{nullptr};
-
+    vk::raii::PhysicalDevice physicalDevice{nullptr};
+    vk::raii::Device device{nullptr};
+    vk::raii::Queue graphicsQueue{nullptr};
+    
 public:
     Vulkan() = default;
     ~Vulkan() = default;
@@ -267,6 +270,10 @@ public:
                 return supportVulkan13 && supportGraphics &&
                        supportDeviceExtensions && supportFeatures;
             });
+        if (physicalDevice == physicalDevices.end()) {
+            throw std::runtime_error("Could not find suitable GPU");
+        }
+        vulkan->physicalDevice = *physicalDevice;
     }
     ~PhysicalDevice() = default;
     PhysicalDevice(const PhysicalDevice &) = delete;
@@ -274,4 +281,41 @@ public:
 };
 export class Device
 {
+    float queuePriority{0.5f};
+    explicit Device(Vulkan *vulkan)
+    {
+        std::vector<vk::QueueFamilyProperties> queueFamilyProperties{
+            vulkan->physicalDevice.getQueueFamilyProperties()};
+        auto graphicsQueueFamilyProperty =
+            std::ranges::find_if(queueFamilyProperties, [](const auto &qfp) {
+                return !!(qfp.queueFlags & vk::QueueFlagBits::eGraphics);
+            });
+        uint32_t graphicsIndex{static_cast<uint32_t>(std::distance(
+            queueFamilyProperties.begin(), graphicsQueueFamilyProperty))};
+        vk::StructureChain<vk::PhysicalDeviceFeatures2,
+                           vk::PhysicalDeviceVulkan11Features,
+                           vk::PhysicalDeviceVulkan13Features,
+                           vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>
+            featureChain{{},
+                         {.shaderDrawParameters = true},
+                         {.dynamicRendering = true},
+                         {.extendedDynamicState = true}};
+        vk::DeviceQueueCreateInfo queueInfo{.queueFamilyIndex = graphicsIndex,
+                                            .queueCount = 1,
+                                            .pQueuePriorities = &queuePriority};
+        vk::DeviceCreateInfo deviceInfo{
+            .pNext = &featureChain.get<vk::PhysicalDeviceFeatures2>(),
+            .queueCreateInfoCount = 1,
+            .pQueueCreateInfos = &queueInfo,
+            .enabledExtensionCount =
+                static_cast<uint32_t>(requiredDeviceExtensions.size()),
+        };
+        
+        vulkan->device = vk::raii::Device{vulkan->physicalDevice, deviceInfo};
+        vulkan->graphicsQueue =
+            vk::raii::Queue{vulkan->device, graphicsIndex, 0};
+    }
+    ~Device() = default;
+    Device(const Device &) = delete;
+    Device &operator=(const Device &) = delete;
 };
