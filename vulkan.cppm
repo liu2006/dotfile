@@ -283,8 +283,7 @@ export class Device
             .queueCreateInfoCount = 1,
             .pQueueCreateInfos = &queueInfo,
             .enabledExtensionCount = static_cast<uint32_t>(requiredDeviceExtensions.size()),
-        };
-
+            .ppEnabledExtensionNames = requiredDeviceExtensions.data()};
         vulkan->device = vk::raii::Device{vulkan->physicalDevice, deviceInfo};
         vulkan->graphicsQueue = vk::raii::Queue{vulkan->device, graphicsIndex, 0};
     }
