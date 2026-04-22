@@ -1,10 +1,9 @@
-#include <iostream>
 #include <chrono>
+#include <iostream>
 #include <memory>
 import initVulkan;
 
-template <typename T, typename... Types>
-void initStep(Types &&...args)
+template <typename T, typename... Types> void initStep(Types &&...args)
 {
     std::make_unique<T>(std::forward<Types>(args)...);
 }
