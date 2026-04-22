@@ -66,6 +66,7 @@ export class Vulkan
     friend class PhysicalDevice;
     friend class Device;
     friend class SwapChain;
+    friend class Pipeline;
 
 private:
     vk::raii::Context context;
@@ -385,4 +386,17 @@ public:
     ~SwapChain() = default;
     SwapChain(const SwapChain &) = delete;
     SwapChain &operator=(const SwapChain &) = delete;
+};
+
+export class Pipeline
+{
+private:
+public:
+    explicit Pipeline(Vulkan *vulkan)
+    {
+        
+    }
+    ~Pipeline() = default;
+    Pipeline(const Pipeline &) = delete;
+    Pipeline &operator=(const Pipeline &) = delete;
 };
