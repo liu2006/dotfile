@@ -18,7 +18,8 @@ struct VSOutput
 }
 
 [shader("fragment")] float4 fragMain(VSOutput vertIn)
-    : SV_TARGET
+: SV_TARGET
 {
     return float4(vertIn.color, 1.0);
 }
+

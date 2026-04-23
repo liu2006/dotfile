@@ -22,11 +22,16 @@ int main()
             initStep<Device>(vulkan.get());
             initStep<SwapChain>(vulkan.get(), sdl->getWindow());
             initStep<Pipeline>(vulkan.get());
+            initStep<CommandPool>(vulkan.get());
+            initStep<CommandBuffers>(vulkan.get());
+            initStep<SyncObjects>(vulkan.get());
+            initStep<VertexBuffer>(vulkan.get());
         }
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> duration{end - start};
         std::cout << std::format("Runtime: {}\n", duration.count());
-        sdl->run();
+        auto drawFunc = [&]() { Draw::drawFrame(vulkan.get(), sdl->getWindow()); };
+        sdl->mainLoop(vulkan.get(), drawFunc);
     } catch (const std::exception &err) {
         std::cerr << err.what() << std::endl;
         return EXIT_FAILURE;
