@@ -1,8 +1,8 @@
 module;
-#include <functional>
-#include <fstream>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
+#include <fstream>
+#include <functional>
 #include <iostream>
 #include <vulkan/vulkan_raii.hpp>
 export module initVulkan;
@@ -55,7 +55,7 @@ private:
     std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
     std::vector<vk::raii::Semaphore> presentCompleteSemaphores;
     std::vector<vk::raii::Fence> inFlightFences;
-    
+
     vk::raii::Buffer vertexBuffer{nullptr};
     vk::raii::DeviceMemory vertexBufferMemory{nullptr};
     uint32_t frameIndex{};
@@ -101,7 +101,9 @@ public:
     SDLGuard()
     {
         SDL_Init(SDL_INIT_VIDEO);
-        window = SDL_CreateWindow(title, width, height, SDL_WINDOW_VULKAN | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
+        window =
+            SDL_CreateWindow(title, width, height,
+                             SDL_WINDOW_VULKAN | SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
     }
     ~SDLGuard()
     {
@@ -292,7 +294,7 @@ export class Device
 {
 private:
     float queuePriority{0.5f};
-    
+
 public:
     explicit Device(Vulkan *vulkan)
     {
@@ -336,6 +338,7 @@ private:
     std::vector<vk::PresentModeKHR> availablePresentModes;
     int width{}, height{};
     uint32_t minImageCount;
+
 public:
     SwapChain(Vulkan *vulkan, SDL_Window *window)
         : surfaceCapabilities{
@@ -345,16 +348,15 @@ public:
               vulkan->physicalDevice.getSurfacePresentModesKHR(*vulkan->surface)},
           minImageCount{std::max(3u, surfaceCapabilities.minImageCount)}
     {
-        vulkan->swapChainFormat =
-            [&]() {
-                if (availableFormats.empty())
-                    throw std::runtime_error("Could not suitable surface format");
-                auto format = std::ranges::find_if(availableFormats, [](const auto &format) {
-                    return format.format == vk::Format::eB8G8R8Srgb &&
-                           format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
-                });
-                return (format != availableFormats.end()) ? *format : availableFormats[0];
-            }();
+        vulkan->swapChainFormat = [&]() {
+            if (availableFormats.empty())
+                throw std::runtime_error("Could not suitable surface format");
+            auto format = std::ranges::find_if(availableFormats, [](const auto &format) {
+                return format.format == vk::Format::eB8G8R8Srgb &&
+                       format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+            });
+            return (format != availableFormats.end()) ? *format : availableFormats[0];
+        }();
         auto swapChainPresentMode = [&]() {
             if (std::ranges::none_of(availablePresentModes, [](const auto &presentMode) {
                     return presentMode == vk::PresentModeKHR::eFifo;
@@ -421,6 +423,7 @@ export class Pipeline
 private:
     std::vector<vk::DynamicState> dynamicStates{vk::DynamicState::eViewport,
                                                 vk::DynamicState::eScissor};
+
 public:
     explicit Pipeline(Vulkan *vulkan)
     {
@@ -446,7 +449,7 @@ public:
             .module = shaderModule,
             .pName = "fragMain"};
         std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages{vertexShaderInfo,
-                                                                     fragmentShaderInfo};
+                                                                      fragmentShaderInfo};
         auto bindingDescription = Vertex::getBindingDescription();
         auto attributeDescriptions = Vertex::getAttributeDescriptions();
 
@@ -476,9 +479,9 @@ public:
 
         vk::PipelineColorBlendAttachmentState colorBlendAttachment{
             .blendEnable = vk::False,
-            .colorWriteMask = {vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
-                               vk::ColorComponentFlagBits::eB |
-                               vk::ColorComponentFlagBits::eA}};
+            .colorWriteMask = {
+                vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+                vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA}};
         vk::PipelineColorBlendStateCreateInfo colorBlendInfo{.logicOpEnable = vk::False,
                                                              .logicOp = vk::LogicOp::eCopy,
                                                              .attachmentCount = 1,
@@ -535,11 +538,12 @@ export class CommandBuffers
 {
 private:
     vk::CommandBufferAllocateInfo allocateInfo;
+
 public:
     explicit CommandBuffers(Vulkan *vulkan)
         : allocateInfo{.commandPool = vulkan->commandPool,
                        .level = vk::CommandBufferLevel::ePrimary,
-                       .commandBufferCount = MAX_FRAMES_IN_FLIGHT} 
+                       .commandBufferCount = MAX_FRAMES_IN_FLIGHT}
     {
         vulkan->commandBuffers = vk::raii::CommandBuffers{vulkan->device, allocateInfo};
     }
@@ -581,14 +585,16 @@ private:
     uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
     {
         for (uint32_t i{}; i < memoryProperties.memoryTypeCount; i++) {
-            if (!!(typeFilter & (i << i)) && (memoryProperties.memoryTypes[i].propertyFlags & properties))
+            if (!!(typeFilter & (i << i)) &&
+                (memoryProperties.memoryTypes[i].propertyFlags & properties))
                 return i;
         }
         throw std::runtime_error("Could not find suitabel memory type");
     }
+
 public:
     explicit VertexBuffer(Vulkan *vulkan)
-        : memoryProperties{vulkan->physicalDevice.getMemoryProperties()} 
+        : memoryProperties{vulkan->physicalDevice.getMemoryProperties()}
     {
         vulkan->vertexBuffer = vk::raii::Buffer{vulkan->device, bufferInfo};
         vk::MemoryRequirements memoryRequirements{
@@ -613,45 +619,6 @@ public:
 export class Draw
 {
 private:
-public:
-    static void drawFrame(Vulkan *vulkan, SDL_Window *window)
-    {
-        auto fenceResult = vulkan->device.waitForFences(
-            *vulkan->inFlightFences[vulkan->frameIndex], vk::True, UINT64_MAX);
-        auto [result, imageIndex] = vulkan->swapChain.acquireNextImage(
-            UINT64_MAX, vulkan->presentCompleteSemaphores[vulkan->frameIndex], nullptr);
-        if (result == vk::Result::eErrorOutOfDateKHR) {
-            recreateSwapChain(vulkan, window);
-            return;
-        }
-        vulkan->device.resetFences(*vulkan->inFlightFences[vulkan->frameIndex]);
-        vulkan->commandBuffers[vulkan->frameIndex].reset();
-        recordCommandBuffer(vulkan, imageIndex);
-        vk::PipelineStageFlags waitDestinationStageMask{
-            vk::PipelineStageFlagBits::eColorAttachmentOutput};
-        const vk::SubmitInfo submitInfo{
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &*vulkan->presentCompleteSemaphores[vulkan->frameIndex],
-            .pWaitDstStageMask = &waitDestinationStageMask,
-            .commandBufferCount = 1,
-            .pCommandBuffers = &*vulkan->commandBuffers[vulkan->frameIndex],
-            .signalSemaphoreCount = 1,
-            .pSignalSemaphores = &*vulkan->renderFinishedSemaphores[imageIndex]};
-        vulkan->graphicsQueue.submit(submitInfo, *vulkan->inFlightFences[vulkan->frameIndex]);
-        const vk::PresentInfoKHR presentInfo{
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &*vulkan->renderFinishedSemaphores[imageIndex],
-            .swapchainCount = 1,
-            .pSwapchains = &*vulkan->swapChain,
-            .pImageIndices = &imageIndex};
-        result = vulkan->graphicsQueue.presentKHR(presentInfo);
-        if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR ||
-            vulkan->framebufferResized) {
-            vulkan->framebufferResized = false;
-            recreateSwapChain(vulkan, window);
-        }
-        vulkan->frameIndex = (vulkan->frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
-    }
     static void recreateSwapChain(Vulkan *vulkan, SDL_Window *window)
     {
         int width{}, height{};
@@ -676,11 +643,11 @@ public:
                               vk::PipelineStageFlagBits2::eColorAttachmentOutput);
         vk::ClearValue clearColor{vk::ClearColorValue{0.0f, 0.0f, 0.0f, 1.0f}};
         vk::RenderingAttachmentInfo attachmentInfo{
-             .imageView = vulkan->swapChainImageViews[imageIndex],
-             .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-             .loadOp = vk::AttachmentLoadOp::eClear,
-             .storeOp = vk::AttachmentStoreOp::eStore,
-             .clearValue = clearColor,
+            .imageView = vulkan->swapChainImageViews[imageIndex],
+            .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+            .loadOp = vk::AttachmentLoadOp::eClear,
+            .storeOp = vk::AttachmentStoreOp::eStore,
+            .clearValue = clearColor,
         };
         vk::RenderingInfo renderingInfo{
             .renderArea = {vk::Rect2D(vk::Offset2D(0, 0), vulkan->swapChainExtent)},
@@ -723,6 +690,49 @@ public:
             .subresourceRange = {vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1}};
         vk::DependencyInfo dependencyInfo{.imageMemoryBarrierCount = 1,
                                           .pImageMemoryBarriers = &barrier};
-        vulkan->commandBuffers[vulkan->frameIndex].pipelineBarrier2(dependencyInfo); 
+        vulkan->commandBuffers[vulkan->frameIndex].pipelineBarrier2(dependencyInfo);
     }
+
+public:
+    static void drawFrame(Vulkan *vulkan, SDL_Window *window)
+    {
+        auto fenceResult = vulkan->device.waitForFences(
+            *vulkan->inFlightFences[vulkan->frameIndex], vk::True, UINT64_MAX);
+        auto [result, imageIndex] = vulkan->swapChain.acquireNextImage(
+            UINT64_MAX, vulkan->presentCompleteSemaphores[vulkan->frameIndex], nullptr);
+        if (result == vk::Result::eErrorOutOfDateKHR) {
+            recreateSwapChain(vulkan, window);
+            return;
+        }
+        vulkan->device.resetFences(*vulkan->inFlightFences[vulkan->frameIndex]);
+        vulkan->commandBuffers[vulkan->frameIndex].reset();
+        recordCommandBuffer(vulkan, imageIndex);
+        vk::PipelineStageFlags waitDestinationStageMask{
+            vk::PipelineStageFlagBits::eColorAttachmentOutput};
+        const vk::SubmitInfo submitInfo{
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &*vulkan->presentCompleteSemaphores[vulkan->frameIndex],
+            .pWaitDstStageMask = &waitDestinationStageMask,
+            .commandBufferCount = 1,
+            .pCommandBuffers = &*vulkan->commandBuffers[vulkan->frameIndex],
+            .signalSemaphoreCount = 1,
+            .pSignalSemaphores = &*vulkan->renderFinishedSemaphores[imageIndex]};
+        vulkan->graphicsQueue.submit(submitInfo, *vulkan->inFlightFences[vulkan->frameIndex]);
+        const vk::PresentInfoKHR presentInfo{
+            .waitSemaphoreCount = 1,
+            .pWaitSemaphores = &*vulkan->renderFinishedSemaphores[imageIndex],
+            .swapchainCount = 1,
+            .pSwapchains = &*vulkan->swapChain,
+            .pImageIndices = &imageIndex};
+        result = vulkan->graphicsQueue.presentKHR(presentInfo);
+        if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR ||
+            vulkan->framebufferResized) {
+            vulkan->framebufferResized = false;
+            recreateSwapChain(vulkan, window);
+        }
+        vulkan->frameIndex = (vulkan->frameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
+    Draw() = default;
+    ~Draw() = default;
 };
