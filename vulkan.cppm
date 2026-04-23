@@ -589,6 +589,19 @@ public:
           memoryProperties{vulkan->physicalDevice.getMemoryProperties()}
     {
     }
+    void createBuffer(vk::raii::Buffer &buffer, vk::raii::DeviceMemory &bufferMemory,
+                     vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties)
+    {
+        vk::BufferCreateInfo bufferInfo{
+            .size = size, .usage = usage, .sharingMode = vk::SharingMode::eExclusive};
+        buffer = vk::raii::Buffer{vulkan->device, bufferInfo};
+        vk::MemoryRequirements memoryRequirements{buffer.getMemoryRequirements()};
+        vk::MemoryAllocateInfo memoryAllocateInfo{
+            .allocationSize = memoryRequirements.size,
+            .memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits, properties)};
+        bufferMemory = vk::raii::DeviceMemory{vulkan->device, memoryAllocateInfo};
+        buffer.bindMemory(bufferMemory, 0);
+    }
     uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
     {
         for (uint32_t i{}; i < memoryProperties.memoryTypeCount; i++) {
@@ -623,42 +636,26 @@ public:
 export class VertexBuffer : public BaseBuffer
 {
 private:
+    vk::raii::Buffer stageBuffer{nullptr};
+    vk::raii::DeviceMemory stageBufferMemory{nullptr};
+    
 public:
     explicit VertexBuffer(Vulkan *vulkan, vk::DeviceSize size)
         : BaseBuffer{vulkan, size}
     {
-        vk::BufferCreateInfo stageBufferInfo{.size = size,
-                                               .usage = vk::BufferUsageFlagBits::eTransferSrc,
-                                               .sharingMode = vk::SharingMode::eExclusive};
-        vk::raii::Buffer stageBuffer{vulkan->device, stageBufferInfo};
-
-        vk::MemoryRequirements _memoryRequirements{stageBuffer.getMemoryRequirements()};
-        vk::MemoryAllocateInfo _memoryAllocateInfo{
-            .allocationSize = _memoryRequirements.size,
-            .memoryTypeIndex =
-            findMemoryType(_memoryRequirements.memoryTypeBits,
-                               vk::MemoryPropertyFlagBits::eHostVisible |
-                                   vk::MemoryPropertyFlagBits::eHostCoherent)};
-        vk::raii::DeviceMemory stageBufferMemory{vulkan->device, _memoryAllocateInfo};
-        stageBuffer.bindMemory(stageBufferMemory, 0);
+        createBuffer(stageBuffer, stageBufferMemory,
+                     vk::BufferUsageFlagBits::eTransferSrc,
+                     vk::MemoryPropertyFlagBits::eHostVisible |
+                         vk::MemoryPropertyFlagBits::eHostCoherent);
+        
         void *stageData = stageBufferMemory.mapMemory(0, size);
         memcpy(stageData, vertices.data(), size);
         stageBufferMemory.unmapMemory();
 
-        vk::BufferCreateInfo bufferInfo{.size = size,
-                                        .usage = vk::BufferUsageFlagBits::eTransferDst |
-                                                 vk::BufferUsageFlagBits::eVertexBuffer,
-                                        .sharingMode = vk::SharingMode::eExclusive};
-        vulkan->vertexBuffer = vk::raii::Buffer{vulkan->device, bufferInfo};
-        vk::MemoryRequirements memoryRequirements{
-            vulkan->vertexBuffer.getMemoryRequirements()};
-        vk::MemoryAllocateInfo memoryAllocateInfo{
-            .allocationSize = memoryRequirements.size,
-            .memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits,
-                                              vk::MemoryPropertyFlagBits::eDeviceLocal)};
-        vulkan->vertexBufferMemory =
-            vk::raii::DeviceMemory{vulkan->device, memoryAllocateInfo};
-        vulkan->vertexBuffer.bindMemory(*vulkan->vertexBufferMemory, 0);
+        createBuffer(vulkan->vertexBuffer, vulkan->vertexBufferMemory,
+                     vk::BufferUsageFlagBits::eTransferDst |
+                         vk::BufferUsageFlagBits::eVertexBuffer,
+                     vk::MemoryPropertyFlagBits::eDeviceLocal);
         copyBuffer(stageBuffer, vulkan->vertexBuffer);
     }
     ~VertexBuffer() = default;
