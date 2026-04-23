@@ -31,6 +31,7 @@ export class Vulkan
     friend class CommandPool;
     friend class CommandBuffers;
     friend class SyncObjects;
+    friend class BaseBuffer;
     friend class VertexBuffer;
     friend class Draw;
 
@@ -574,14 +575,20 @@ public:
     SyncObjects(const SyncObjects &) = delete;
     SyncObjects &operator=(const SyncObjects &) = delete;
 };
-
-export class VertexBuffer
+export class BaseBuffer
 {
+    friend class VertexBuffer;
 private:
+    vk::DeviceSize size;
     vk::PhysicalDeviceMemoryProperties memoryProperties;
-    vk::BufferCreateInfo bufferInfo{.size = vertices.size() * sizeof(vertices[0]),
-                                    .usage = vk::BufferUsageFlagBits::eVertexBuffer,
-                                    .sharingMode = vk::SharingMode::eExclusive};
+    Vulkan *vulkan;
+    
+public:
+    BaseBuffer(Vulkan *vulkan, vk::DeviceSize size)
+        : vulkan{vulkan}, size{size},
+          memoryProperties{vulkan->physicalDevice.getMemoryProperties()}
+    {
+    }
     uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
     {
         for (uint32_t i{}; i < memoryProperties.memoryTypeCount; i++) {
@@ -591,25 +598,68 @@ private:
         }
         throw std::runtime_error("Could not find suitabel memory type");
     }
-
-public:
-    explicit VertexBuffer(Vulkan *vulkan)
-        : memoryProperties{vulkan->physicalDevice.getMemoryProperties()}
+    void copyBuffer(vk::raii::Buffer &srcBuffer, vk::raii::Buffer &dstBuffer)
     {
+        vk::CommandBufferAllocateInfo allocateInfo{.commandPool = vulkan->commandPool,
+                                                   .level = vk::CommandBufferLevel::ePrimary,
+                                                   .commandBufferCount = 1};
+        vk::raii::CommandBuffer _commandBuffer{
+            std::move(vk::raii::CommandBuffers{vulkan->device, allocateInfo}.front())};
+        _commandBuffer.begin(vk::CommandBufferBeginInfo{
+            .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+        _commandBuffer.copyBuffer(*srcBuffer, *dstBuffer, vk::BufferCopy(0, 0, size));
+        _commandBuffer.end();
+        vk::raii::Fence fence{vulkan->device, vk::FenceCreateInfo{}};
+        vulkan->graphicsQueue.submit(
+            vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &*_commandBuffer},
+            *fence);
+        auto fenceResult = vulkan->device.waitForFences(*fence, vk::True, UINT64_MAX);
+    }
+    ~BaseBuffer() = default;
+    BaseBuffer(const BaseBuffer &) = delete;
+    BaseBuffer &operator=(const BaseBuffer &) = delete;
+};
+
+export class VertexBuffer : public BaseBuffer
+{
+private:
+public:
+    explicit VertexBuffer(Vulkan *vulkan, vk::DeviceSize size)
+        : BaseBuffer{vulkan, size}
+    {
+        vk::BufferCreateInfo stageBufferInfo{.size = size,
+                                               .usage = vk::BufferUsageFlagBits::eTransferSrc,
+                                               .sharingMode = vk::SharingMode::eExclusive};
+        vk::raii::Buffer stageBuffer{vulkan->device, stageBufferInfo};
+
+        vk::MemoryRequirements _memoryRequirements{stageBuffer.getMemoryRequirements()};
+        vk::MemoryAllocateInfo _memoryAllocateInfo{
+            .allocationSize = _memoryRequirements.size,
+            .memoryTypeIndex =
+            findMemoryType(_memoryRequirements.memoryTypeBits,
+                               vk::MemoryPropertyFlagBits::eHostVisible |
+                                   vk::MemoryPropertyFlagBits::eHostCoherent)};
+        vk::raii::DeviceMemory stageBufferMemory{vulkan->device, _memoryAllocateInfo};
+        stageBuffer.bindMemory(stageBufferMemory, 0);
+        void *stageData = stageBufferMemory.mapMemory(0, size);
+        memcpy(stageData, vertices.data(), size);
+        stageBufferMemory.unmapMemory();
+
+        vk::BufferCreateInfo bufferInfo{.size = size,
+                                        .usage = vk::BufferUsageFlagBits::eTransferDst |
+                                                 vk::BufferUsageFlagBits::eVertexBuffer,
+                                        .sharingMode = vk::SharingMode::eExclusive};
         vulkan->vertexBuffer = vk::raii::Buffer{vulkan->device, bufferInfo};
         vk::MemoryRequirements memoryRequirements{
             vulkan->vertexBuffer.getMemoryRequirements()};
         vk::MemoryAllocateInfo memoryAllocateInfo{
             .allocationSize = memoryRequirements.size,
             .memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits,
-                                              vk::MemoryPropertyFlagBits::eHostVisible |
-                                                  vk::MemoryPropertyFlagBits::eHostCoherent)};
+                                              vk::MemoryPropertyFlagBits::eDeviceLocal)};
         vulkan->vertexBufferMemory =
             vk::raii::DeviceMemory{vulkan->device, memoryAllocateInfo};
         vulkan->vertexBuffer.bindMemory(*vulkan->vertexBufferMemory, 0);
-        void *data = vulkan->vertexBufferMemory.mapMemory(0, bufferInfo.size);
-        memcpy(data, vertices.data(), bufferInfo.size);
-        vulkan->vertexBufferMemory.unmapMemory();
+        copyBuffer(stageBuffer, vulkan->vertexBuffer);
     }
     ~VertexBuffer() = default;
     VertexBuffer(const VertexBuffer &) = delete;

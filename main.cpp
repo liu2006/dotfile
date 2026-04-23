@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 import initVulkan;
+import vertexInput;
 
 template <typename T, typename... Types> void initStep(Types &&...args)
 {
@@ -25,7 +26,7 @@ int main()
             initStep<CommandPool>(vulkan.get());
             initStep<CommandBuffers>(vulkan.get());
             initStep<SyncObjects>(vulkan.get());
-            initStep<VertexBuffer>(vulkan.get());
+            initStep<VertexBuffer>(vulkan.get(), sizeof(vertices[0]) * vertices.size());
         }
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> duration{end - start};
