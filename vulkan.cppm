@@ -582,13 +582,14 @@ export class BaseBuffer
 {
     friend class VertexBuffer;
     friend class IndexBuffer;
+
 private:
     vk::DeviceSize size;
     vk::PhysicalDeviceMemoryProperties memoryProperties;
     Vulkan *vulkan;
     vk::raii::Buffer stageBuffer{nullptr};
     vk::raii::DeviceMemory stageBufferMemory{nullptr};
-    
+
 public:
     BaseBuffer(Vulkan *vulkan, vk::DeviceSize size)
         : vulkan{vulkan}, size{size},
@@ -596,7 +597,7 @@ public:
     {
     }
     void createBuffer(vk::raii::Buffer &buffer, vk::raii::DeviceMemory &bufferMemory,
-                     vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties)
+                      vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties)
     {
         vk::BufferCreateInfo bufferInfo{
             .size = size, .usage = usage, .sharingMode = vk::SharingMode::eExclusive};
@@ -643,14 +644,14 @@ export class VertexBuffer : public BaseBuffer
 {
 private:
 public:
-    explicit VertexBuffer(Vulkan *vulkan, vk::DeviceSize size, const std::vector<Vertex> &vertices)
+    explicit VertexBuffer(Vulkan *vulkan, vk::DeviceSize size,
+                          const std::vector<Vertex> &vertices)
         : BaseBuffer{vulkan, size}
     {
-        createBuffer(stageBuffer, stageBufferMemory,
-                     vk::BufferUsageFlagBits::eTransferSrc,
+        createBuffer(stageBuffer, stageBufferMemory, vk::BufferUsageFlagBits::eTransferSrc,
                      vk::MemoryPropertyFlagBits::eHostVisible |
                          vk::MemoryPropertyFlagBits::eHostCoherent);
-        
+
         void *stageData = stageBufferMemory.mapMemory(0, size);
         memcpy(stageData, vertices.data(), size);
         stageBufferMemory.unmapMemory();
@@ -690,7 +691,6 @@ public:
     IndexBuffer(const IndexBuffer &) = delete;
     IndexBuffer &operator=(const IndexBuffer &) = delete;
 };
-
 
 export class Draw
 {
