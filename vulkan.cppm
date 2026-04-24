@@ -33,6 +33,7 @@ export class Vulkan
     friend class SyncObjects;
     friend class BaseBuffer;
     friend class VertexBuffer;
+    friend class IndexBuffer;
     friend class Draw;
 
 private:
@@ -59,6 +60,8 @@ private:
 
     vk::raii::Buffer vertexBuffer{nullptr};
     vk::raii::DeviceMemory vertexBufferMemory{nullptr};
+    vk::raii::Buffer indexBuffer{nullptr};
+    vk::raii::DeviceMemory indexBufferMemory{nullptr};
     uint32_t frameIndex{};
     bool framebufferResized{};
 
@@ -578,10 +581,13 @@ public:
 export class BaseBuffer
 {
     friend class VertexBuffer;
+    friend class IndexBuffer;
 private:
     vk::DeviceSize size;
     vk::PhysicalDeviceMemoryProperties memoryProperties;
     Vulkan *vulkan;
+    vk::raii::Buffer stageBuffer{nullptr};
+    vk::raii::DeviceMemory stageBufferMemory{nullptr};
     
 public:
     BaseBuffer(Vulkan *vulkan, vk::DeviceSize size)
@@ -636,11 +642,8 @@ public:
 export class VertexBuffer : public BaseBuffer
 {
 private:
-    vk::raii::Buffer stageBuffer{nullptr};
-    vk::raii::DeviceMemory stageBufferMemory{nullptr};
-    
 public:
-    explicit VertexBuffer(Vulkan *vulkan, vk::DeviceSize size)
+    explicit VertexBuffer(Vulkan *vulkan, vk::DeviceSize size, const std::vector<Vertex> &vertices)
         : BaseBuffer{vulkan, size}
     {
         createBuffer(stageBuffer, stageBufferMemory,
@@ -662,6 +665,32 @@ public:
     VertexBuffer(const VertexBuffer &) = delete;
     VertexBuffer &operator=(const VertexBuffer &) = delete;
 };
+
+export class IndexBuffer : public BaseBuffer
+{
+private:
+public:
+    IndexBuffer(Vulkan *vulkan, vk::DeviceSize size, const std::vector<uint32_t> &indices)
+        : BaseBuffer{vulkan, size}
+    {
+        createBuffer(stageBuffer, stageBufferMemory, vk::BufferUsageFlagBits::eTransferSrc,
+                     vk::MemoryPropertyFlagBits::eHostVisible |
+                         vk::MemoryPropertyFlagBits::eHostCoherent);
+        void *stageData = stageBufferMemory.mapMemory(0, size);
+        memcpy(stageData, indices.data(), size);
+        stageBufferMemory.unmapMemory();
+
+        createBuffer(vulkan->indexBuffer, vulkan->indexBufferMemory,
+                     vk::BufferUsageFlagBits::eTransferDst |
+                         vk::BufferUsageFlagBits::eIndexBuffer,
+                     vk::MemoryPropertyFlagBits::eDeviceLocal);
+        copyBuffer(stageBuffer, vulkan->indexBuffer);
+    }
+    ~IndexBuffer() = default;
+    IndexBuffer(const IndexBuffer &) = delete;
+    IndexBuffer &operator=(const IndexBuffer &) = delete;
+};
+
 
 export class Draw
 {
@@ -708,7 +737,8 @@ private:
                             static_cast<float>(vulkan->swapChainExtent.height), 0.0f, 1.0f));
         commandBuffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), vulkan->swapChainExtent));
         commandBuffer.bindVertexBuffers(0, *vulkan->vertexBuffer, {0});
-        commandBuffer.draw(vertices.size(), 1, 0, 0);
+        commandBuffer.bindIndexBuffer(*vulkan->indexBuffer, 0, vk::IndexType::eUint32);
+        commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
         commandBuffer.endRendering();
         transitionImageLayout(vulkan, imageIndex, vk::ImageLayout::eColorAttachmentOptimal,
                               vk::ImageLayout::ePresentSrcKHR,

@@ -26,7 +26,9 @@ int main()
             initStep<CommandPool>(vulkan.get());
             initStep<CommandBuffers>(vulkan.get());
             initStep<SyncObjects>(vulkan.get());
-            initStep<VertexBuffer>(vulkan.get(), sizeof(vertices[0]) * vertices.size());
+            initStep<VertexBuffer>(vulkan.get(), sizeof(vertices[0]) * vertices.size(),
+                                   vertices);
+            initStep<IndexBuffer>(vulkan.get(), sizeof(indices[0]) * indices.size(), indices);
         }
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double> duration{end - start};
