@@ -1,0 +1,15 @@
+:PROPERTIES:
+:ID:       6d0bf3e2-c2f2-402d-bcf1-23df7c53036c
+:END:
+
+#+title: enable
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+#+BEGIN_SRC bash
+  sudo systemctl enable --now NetworkManager sddm
+  systemctl --user enable --now pipewire pipewire-pulse wireplumber bluetooth 
+#+END_SRC
+
+

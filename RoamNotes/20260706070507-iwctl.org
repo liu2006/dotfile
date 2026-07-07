@@ -1,0 +1,28 @@
+:PROPERTIES:
+:ID:       becffd78-1456-4ae3-95f8-45ef44ea152f
+:END:
+
+#+title: iwctl
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+#+BEGIN_SRC bash
+  iwctl
+  [iwd]# device list  #查找网卡
+  [iwd]# station wlan0 scan  #启动wifi扫描
+  [iwd]# station wlan0 get-network  #列出所有可用的网络
+  [iwd]# station wlan0 connect (device)  #连接wifi
+#+END_SRC
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,18 @@
+:PROPERTIES:
+:ID:       7b22be01-c2f8-4d0f-b00c-88ab9ee9d452
+:END:
+
+#+title: mount
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+* 分区挂载教程
+
+#+BEGIN_SRC bash
+  mount /dev/root /mnt  #挂载根分区
+  mount /dev/efi --mkdir /mnt/boot  #创建efi分区并挂载
+  sawpon /dev/swap_partition  #启动swap分区
+#+END_SRC
+
+

@@ -1,0 +1,16 @@
+:PROPERTIES:
+:ID:       403baf78-dc5f-4917-b312-10679603c60c
+:END:
+
+#+title: origin
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+* 更换China源
+
+#+BEGIN_SRC bash
+  reflector --country China --age 24 --sort rate --protocol https --save /etc/pacman.d/mirrorlist
+#+END_SRC
+
+

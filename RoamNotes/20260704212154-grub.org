@@ -1,0 +1,15 @@
+:PROPERTIES:
+:ID:       5135c42a-8091-42e9-a3bd-7f7629b11a6b
+:END:
+
+#+title: grub
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+#+BEGIN_SRC bash
+  grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB  #把GRUB安装到EFI/磁盘
+  grub-mkconfig -o /boot/grub/grub.cfg  #生成启动菜单
+#+END_SRC
+
+

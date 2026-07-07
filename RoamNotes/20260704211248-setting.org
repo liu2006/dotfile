@@ -1,0 +1,14 @@
+:PROPERTIES:
+:ID:       2e42e32a-fac2-46bb-8c1b-169679ff3620
+:END:
+
+#+title: setting
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+#+BEGIN_SRC bash
+  ln -sf /usr/share/zoneinfo/Area/Location /etc/localtime
+  hwclock --systohc
+#+END_SRC
+

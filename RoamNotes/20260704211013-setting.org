@@ -1,0 +1,14 @@
+:PROPERTIES:
+:ID:       8fe5f874-b9a1-4192-bdec-ca4c96550a0f
+:END:
+
+#+title: setting
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+#+BEGIN_SRC bash
+  genfstab -U /mnt >> /mnt/etc/fstab
+  arch-chroot /mnt
+#+END_SRC
+

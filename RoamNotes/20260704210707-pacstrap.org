@@ -1,0 +1,17 @@
+:PROPERTIES:
+:ID:       b4d23696-9065-40cd-865b-b13634a3f3d0
+:END:
+
+#+title: pacstrap
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+#+BEGIN_SRC bash
+  pacstrap -K /mnt \
+  base base-devel git cmake linux-zen linux-firmware amd-ucode intel-ucode emacs kitty networkmanager \
+  iproute2 noto-fonts noto-fonts-cjk noto-fonts-emoji i3-wm dmenu i3status sddm pipewire wireplumber \
+  pipewire-alsa pipewire-pluse bluez bluez-utils mpv
+#+END_SRC
+
+

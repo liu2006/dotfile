@@ -1,0 +1,20 @@
+:PROPERTIES:
+:ID:       1e08d26f-8f94-413b-a623-e35a33500ec1
+:END:
+
+#+title: fdisk
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+* 关于fdisk工具的使用教程
+#+BEGIN_SRC bash
+  fdisk -l  #列出可用硬盘和分区情况
+  fdisk device  #对指定设备进行分区
+  - g  #创建GPT分区
+  - n  #新建分区
+  - d  #删除分区
+  - t  #设置分区类型
+  - w  #保存分区
+#+END_SRC
+

@@ -1,0 +1,16 @@
+:PROPERTIES:
+:ID:       45a2091e-3efa-4d72-962e-3b414f7f63d8
+:END:
+
+#+title: format
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+* 如何格式化分区
+#+BEGIN_SRC bash
+  mkfs.ext4 /dev/root_partiion  #格式化根分区
+  mkswap /dev/swap_partition  #格式化交换分区
+  mkfs.fat -F32 /dev/efi_partition  #格式化efi分区
+#+END_SRC
+

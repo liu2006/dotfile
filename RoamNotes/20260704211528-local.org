@@ -1,0 +1,15 @@
+:PROPERTIES:
+:ID:       50711aed-3191-4892-9599-6d77eb85c7f1
+:END:
+
+#+title: local
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+#+BEGIN_SRC bash
+  emacs /etc/locale.gen  #取消注释zh_CN.UTF-8和en_US.UTF-8
+  locale-gen  #同步
+  emacs /etc/locale.conf  #添加zh_CN.UTF-8和en_US.UTF-8 UTF-8
+#+END_SRC
+

@@ -1,0 +1,30 @@
+:PROPERTIES:
+:ID:       1f7326f6-2947-4c16-96e0-eb6aa0441073
+:END:
+
+#+title: Tutorial
+#+STARTUP: overview
+#+OPTIONS: toc:nil num:nil
+
+#+HUGO_BASE_DIR: ~/Tutorial
+#+EXPORT_FILE_NAME: _index
+#+HUGO_SECTION: 
+#+HUGO_WEIGHT: 1
+
+* TODO 开始安装 <2026-07-06 一>
+* 关于arch linux的安装教程
+  - 使用 =setfont-132tar= 设置终端大号字体，使用 =ip link= 检查网卡，通过[[id:becffd78-1456-4ae3-95f8-45ef44ea152f][iwctl]]工具进行无线网连接。
+  - 通过 =ping (website)= 检查网络连接是否成功。
+  - 随后使用[[id:1e08d26f-8f94-413b-a623-e35a33500ec1][fdisk]]工具对磁盘进行分区, 并格式化[[id:45a2091e-3efa-4d72-962e-3b414f7f63d8][format]]分区，挂载[[id:7b22be01-c2f8-4d0f-b00c-88ab9ee9d452][mount]]分区。
+  - 更换本地源[[id:403baf78-dc5f-4917-b312-10679603c60c][origin]]可以提升下载速度降低失败率。
+  - 现在可以使用[[id:b4d23696-9065-40cd-865b-b13634a3f3d0][pacstrap]]安装必要的固件。
+  - 设置[[id:8fe5f874-b9a1-4192-bdec-ca4c96550a0f][setting]]系统开机自动挂载规则并进入系统。
+  - 设置[[id:2e42e32a-fac2-46bb-8c1b-169679ff3620][setting]]时区并写入硬件。
+  - 启动[[id:6d0bf3e2-c2f2-402d-bcf1-23df7c53036c][enable]]必要的服务。
+  - 主机本地化[[id:50711aed-3191-4892-9599-6d77eb85c7f1][local]]。
+  - 设置管理员密码[[id:7566d8df-d1cb-4b14-80a2-1584120c0188][password]]，创建用户。
+  - 增强字体[[id:9c454a21-c7ea-46c5-a369-bf2e599944c0][font]]渲染。
+  - 安装引导[[id:5135c42a-8091-42e9-a3bd-7f7629b11a6b][grub]]程序。
+  - 最后通过 =umount -R /mnt= 卸载挂载点。
+
+* DONE 安装完成 <2026-07-06 一>

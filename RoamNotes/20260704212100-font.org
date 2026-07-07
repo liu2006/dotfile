@@ -1,0 +1,13 @@
+:PROPERTIES:
+:ID:       9c454a21-c7ea-46c5-a369-bf2e599944c0
+:END:
+
+#+title: font
+#+HUGO_BASE_DIR: ~/Tutorial
+#+HUGO_SECTION: posts
+#+HUGO_WEIGHT: 10
+
+#+BEGIN_SRC bash
+ emacs /etc/profile.d/freetype2.sh  #取消注释最后一排
+#+END_SRC
+
