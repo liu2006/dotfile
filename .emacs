@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
@@ -25,15 +27,14 @@
 (setq inhibit-startup-screen t)
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
-(global-whitespace-mode)
 (setq-default whitespace-style
               '(face spaces space-mark))
 
 (add-to-list 'default-frame-alist
-             '(font . "RecMonoCasualNerdFont-15:regular"))
+             '(font . "CodeNewRomanNerdFont-12:regular"))
 
 ;; (add-to-list 'default-frame-alist
-;;              '(font . "CaskaydiaMonoNerdFont-14:light"))
+;;              '(font . "CaskaydiaMonoNerdFont-11:light"))
 
 (use-package multiple-cursors
     :ensure t
@@ -70,11 +71,6 @@
     :ensure t
     :defer t
     :init (doom-modeline-mode))
-;; (use-package gruber-darker-theme
-;;     :ensure t
-;;     :defer t
-;;     :init
-;;     (load-theme 'gruber-darker t))
 
 (use-package smex
     :ensure t
@@ -104,7 +100,7 @@
 
 (use-package sh-mode
     :defer t
-    :mode ("\\.xprofile\\'"))
+    :mode ("\\.profile\\'"))
 
 (use-package c++-mode
     :defer t

@@ -1,12 +1,7 @@
 Host dotfile
     HostName github.com
     User git
-    IdentityFile ~/.ssh/github_dotfile
-
-Host vulkan
-     HostName github.com
-     User git
-     IdentityFile ~/.ssh/github_vulkan     
+    IdentityFile ~/.ssh/dotfile
 
 Host ubuntu
      HostName 8.218.161.22
