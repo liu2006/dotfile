@@ -1,5 +1,8 @@
-;; -*- lexical-binding: t; -*-
+;;; .emacs --- Emacs configuration file  -*- lexical-binding: t; -*-
 
+;;; Commentary:
+
+;;; Code:
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
@@ -14,24 +17,26 @@
         (write-file custom-file)))
 (load custom-file)
 
-(column-number-mode)
+(column-number-mode 1)
 (tool-bar-mode 0)
 (menu-bar-mode 0)
 (scroll-bar-mode 0)
-(ido-mode)
-(ido-everywhere)
+
+(require 'ido)
+(ido-mode 1)
+(ido-everywhere 1)
 (setq ido-enable-flex-matching t)
 
 (global-display-line-numbers-mode)
-(setq display-line-numbers-type 'relative)
+(setq-default display-line-numbers-type 'relative)
 (setq inhibit-startup-screen t)
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
 (setq-default whitespace-style
               '(face spaces space-mark))
 
-(setq c-basic-offset 4
-      cmake-tab-width 4
+(setq-default c-ts-indent-offset 4
+      cmake-ts-indent-offset 4
       lisp-body-indent 4)
 
 (add-to-list 'default-frame-alist
@@ -52,7 +57,7 @@
     :ensure t
     :defer t
     :config
-    (setq vterm-timer-delay 0.0084))
+    (setq vterm-timer-delay 0.0069))
 
 (use-package color-theme-sanityinc-tomorrow
     :ensure t
@@ -71,13 +76,15 @@
 
 (use-package lsp-mode
     :ensure t
+    :init
+    (setq lsp-auto-guess-root nil)
     :hook
     ((c++-ts-mode
       c-ts-mode
       bash-ts-mode
       html-ts-mode
       json-ts-mod
-      cmake-mode)
+      cmake-ts-mode)
      . lsp-deferred)
     :commands (lsp lsp-deferred))
 
@@ -100,19 +107,30 @@
   (add-to-list 'major-mode-remap-alist
                '(mhtml-mode . html-ts-mode))
   (add-to-list 'major-mode-remap-alist
-               '(json-mode . json-ts-mode))
+               '(js-json-mode . json-ts-mode))
   )
 
-(setq smtpmail-smtp-server "smtp.gmail.com"
+(use-package flycheck
+  :ensure t
+  :hook ((after-init . global-flycheck-mode))
+  :config
+  (setq global-flycheck-eglot-mode t))
+
+(setq-default smtpmail-smtp-server "smtp.gmail.com"
       smtpmail-smtp-service 587
       smtpmail-stream-type 'starttls)
 
 (setq user-mail-address "liuhongshun80@gmail.com"
       user-full-name "pop")
 
-(setq message-send-mail-function 'smtpmail-send-it)
+(setq-default message-send-mail-function 'smtpmail-send-it)
 (setq auth-sources '("~/.authinfo"))
 
 (put 'dired-find-alternate-file 'disabled nil)
 (put 'set-goal-column 'disabled nil)
 (put 'upcase-region 'disabled nil)
+
+(provide '.emacs)
+;;; .emacs ends here
+
+
