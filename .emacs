@@ -30,11 +30,12 @@
 (setq-default whitespace-style
               '(face spaces space-mark))
 
+(setq c-basic-offset 4
+      cmake-tab-width 4
+      lisp-body-indent 4)
+
 (add-to-list 'default-frame-alist
              '(font . "CodeNewRomanNerdFont-12:regular"))
-
-;; (add-to-list 'default-frame-alist
-;;              '(font . "CaskaydiaMonoNerdFont-11:light"))
 
 (use-package multiple-cursors
     :ensure t
@@ -53,19 +54,9 @@
     :config
     (setq vterm-timer-delay 0.0084))
 
-(use-package doom-themes
+(use-package color-theme-sanityinc-tomorrow
     :ensure t
-    :defer t
-    :init
-    (load-theme 'doom-one t)
-    :custom
-    (doom-themes-treemacs-theme "doom-atom")
-    (doom-themes-enable-italic t) 
-    :config
-    (doom-themes-visual-bell-config)
-    (doom-themes-neotree-config)
-    (doom-themes-treemacs-config)
-    (doom-themes-org-config))
+    :init (load-theme 'sanityinc-tomorrow-night t))
 
 (use-package doom-modeline
     :ensure t
@@ -78,68 +69,39 @@
     :bind (("M-x" . 'smex)
            ("M-X" . 'smex-major-mode-commands)))
 
-(use-package json-mode
+(use-package lsp-mode
     :ensure t
-    :defer t
-    :mode ("\\.jsonc\\'"))
-
-(use-package yaml-mode
-    :ensure t
-    :defer t
-    :mode (("\\.clang-format\\'" . yaml-mode)
-           ("\\.yaml\\'" . yaml-mode)))
-
-(use-package cmake-mode
-    :ensure t
-    :defer t)
-
-(use-package slang-mode
-    :load-path "/home/liu/vendored/slang-mode/"
-    :defer t
-    :mode ("\\.slang\\'"))
-
-(use-package sh-mode
-    :defer t
-    :mode ("\\.profile\\'"))
-
-(use-package c++-mode
-    :defer t
-    :mode ("\\.cppm\\'"))
-
-(use-package eglot
-    :ensure t
-    :defer t
     :hook
-    ((c++-mode c-mode) . eglot-ensure)
-    :config
-    (setq eglot-stay-out-of '(flymake))
-    (add-to-list 'eglot-server-programs
-                 '((c++-mode c-mode) . ("clangd"))))
+    ((c++-ts-mode
+      c-ts-mode
+      bash-ts-mode
+      html-ts-mode
+      json-ts-mod
+      cmake-mode)
+     . lsp-deferred)
+    :commands (lsp lsp-deferred))
 
-(use-package org-roam
-    :ensure t
-    :defer t
-    :custom
-    (org-roam-directory (file-truename "~/RoamNotes/"))
-    :bind (("C-c n l" . org-roam-buffer-toggle)
-           ("C-c n f" . org-roam-node-find)
-           ("C-c n g" . org-roam-graph)
-           ("C-c n i" . org-roam-node-insert)
-           ("C-c n c" . org-roam-capture)
-           ("C-c n j" . org-roam-dailies-capture-today))
-    :config
-    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-    (org-roam-db-autosync-mode)
-    (require 'org-roam-protocol))
-
-(use-package ox-hugo
-    :ensure t
-    :defer t
-    :after ox)
-
-(use-package htmlize
-    :ensure t
-    :defer t)
+(use-package treesit
+  :config
+  (setq treesit-language-source-alist
+        '((c "https://github.com/tree-sitter/tree-sitter-c")
+          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+          (bash "https://github.com/tree-sitter/tree-sitter-bash")
+          (html "https://github.com/tree-sitter/tree-sitter-html")
+          (json "https://github.com/tree-sitter/tree-sitter-json")
+          ))
+  (setq treesit-font-lock-level 4)
+  (add-to-list 'major-mode-remap-alist
+               '(c-mode . c-ts-mode))
+  (add-to-list 'major-mode-remap-alist
+               '(c++-mode . c++-ts-mode))
+  (add-to-list 'major-mode-remap-alist
+               '(sh-mode . bash-ts-mode))
+  (add-to-list 'major-mode-remap-alist
+               '(mhtml-mode . html-ts-mode))
+  (add-to-list 'major-mode-remap-alist
+               '(json-mode . json-ts-mode))
+  )
 
 (setq smtpmail-smtp-server "smtp.gmail.com"
       smtpmail-smtp-service 587
@@ -150,10 +112,6 @@
 
 (setq message-send-mail-function 'smtpmail-send-it)
 (setq auth-sources '("~/.authinfo"))
-
-(setq c-basic-offset 4
-      cmake-tab-width 4
-      lisp-body-indent 4)
 
 (put 'dired-find-alternate-file 'disabled nil)
 (put 'set-goal-column 'disabled nil)
