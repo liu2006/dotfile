@@ -30,7 +30,7 @@
     :config
     (ido-mode 1))
 
-(global-display-line-numbers-mode)
+(global-display-line-numbers-mode 1)
 (setq-default display-line-numbers-type 'relative)
 (setq inhibit-startup-screen t)
 (setq-default tab-width 4)
@@ -42,8 +42,10 @@
               cmake-ts-indent-offset 4
               lisp-body-indent 4)
 
-(add-to-list 'default-frame-alist
-             '(font . "CodeNewRomanNerdFont-12:regular"))
+(set-face-attribute 'default nil
+                    :family "CodeNewRomanNerdFont"
+                    :height 120
+                    :width 'regular)
 
 (use-package multiple-cursors
     :ensure t
