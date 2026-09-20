@@ -22,10 +22,13 @@
 (menu-bar-mode 0)
 (scroll-bar-mode 0)
 
-(require 'ido)
-(ido-mode 1)
-(ido-everywhere 1)
-(setq ido-enable-flex-matching t)
+(use-package ido
+    :ensure nil
+    :init
+    (setq ido-enable-flex-matching t
+          ido-everywhere t)
+    :config
+    (ido-mode 1))
 
 (global-display-line-numbers-mode)
 (setq-default display-line-numbers-type 'relative)
@@ -44,6 +47,7 @@
 
 (use-package multiple-cursors
     :ensure t
+    :defer t
     :bind (("C-S-c C-S-c" . mc/edit-lines)
            ("C->" . mc/mark-next-like-this)
            ("C-<" . mc/mark-previous-like-this)
@@ -61,12 +65,13 @@
 
 (use-package color-theme-sanityinc-tomorrow
     :ensure t
-    :init (load-theme 'sanityinc-tomorrow-night t))
+    :config
+    (load-theme 'sanityinc-tomorrow-night t))
 
 (use-package doom-modeline
     :ensure t
-    :defer t
-    :init (doom-modeline-mode))
+    :config
+    (doom-modeline-mode 1))
 
 (use-package smex
     :ensure t
@@ -89,7 +94,7 @@
     :commands (lsp lsp-deferred))
 
 (use-package treesit
-  :config
+  :init
   (setq treesit-language-source-alist
         '((c "https://github.com/tree-sitter/tree-sitter-c")
           (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
@@ -113,8 +118,8 @@
 (use-package flycheck
   :ensure t
   :hook ((after-init . global-flycheck-mode))
-  :config
-  (setq global-flycheck-eglot-mode t))
+  :init
+  (setq global-flycheck-lsp-mode t))
 
 (setq-default smtpmail-smtp-server "smtp.gmail.com"
       smtpmail-smtp-service 587
