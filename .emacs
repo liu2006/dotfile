@@ -39,8 +39,8 @@
               '(face spaces space-mark))
 
 (setq-default c-ts-indent-offset 4
-      cmake-ts-indent-offset 4
-      lisp-body-indent 4)
+              cmake-ts-indent-offset 4
+              lisp-body-indent 4)
 
 (add-to-list 'default-frame-alist
              '(font . "CodeNewRomanNerdFont-12:regular"))
@@ -94,36 +94,36 @@
     :commands (lsp lsp-deferred))
 
 (use-package treesit
-  :init
-  (setq treesit-language-source-alist
-        '((c "https://github.com/tree-sitter/tree-sitter-c")
-          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-          (bash "https://github.com/tree-sitter/tree-sitter-bash")
-          (html "https://github.com/tree-sitter/tree-sitter-html")
-          (json "https://github.com/tree-sitter/tree-sitter-json")
-          ))
-  (setq treesit-font-lock-level 4)
-  (add-to-list 'major-mode-remap-alist
-               '(c-mode . c-ts-mode))
-  (add-to-list 'major-mode-remap-alist
-               '(c++-mode . c++-ts-mode))
-  (add-to-list 'major-mode-remap-alist
-               '(sh-mode . bash-ts-mode))
-  (add-to-list 'major-mode-remap-alist
-               '(mhtml-mode . html-ts-mode))
-  (add-to-list 'major-mode-remap-alist
-               '(js-json-mode . json-ts-mode))
-  )
+    :init
+    (setq treesit-language-source-alist
+          '((c "https://github.com/tree-sitter/tree-sitter-c")
+            (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+            (bash "https://github.com/tree-sitter/tree-sitter-bash")
+            (html "https://github.com/tree-sitter/tree-sitter-html")
+            (json "https://github.com/tree-sitter/tree-sitter-json")
+            ))
+    (setq treesit-font-lock-level 4)
+    (add-to-list 'major-mode-remap-alist
+                 '(c-mode . c-ts-mode))
+    (add-to-list 'major-mode-remap-alist
+                 '(c++-mode . c++-ts-mode))
+    (add-to-list 'major-mode-remap-alist
+                 '(sh-mode . bash-ts-mode))
+    (add-to-list 'major-mode-remap-alist
+                 '(mhtml-mode . html-ts-mode))
+    (add-to-list 'major-mode-remap-alist
+                 '(js-json-mode . json-ts-mode))
+    )
 
 (use-package flycheck
-  :ensure t
-  :hook ((after-init . global-flycheck-mode))
-  :init
-  (setq global-flycheck-lsp-mode t))
+    :ensure t
+    :hook ((after-init . global-flycheck-mode))
+    :init
+    (setq global-flycheck-lsp-mode t))
 
 (setq-default smtpmail-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-service 587
-      smtpmail-stream-type 'starttls)
+              smtpmail-smtp-service 587
+              smtpmail-stream-type 'starttls)
 
 (setq user-mail-address "liuhongshun80@gmail.com"
       user-full-name "pop")
