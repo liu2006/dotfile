@@ -81,19 +81,16 @@
     :bind (("M-x" . 'smex)
            ("M-X" . 'smex-major-mode-commands)))
 
-(use-package lsp-mode
-    :ensure t
-    :init
-    (setq lsp-auto-guess-root nil)
+(use-package eglot
+    :ensure nil
     :hook
-    ((c++-ts-mode
-      c-ts-mode
-      bash-ts-mode
-      html-ts-mode
-      json-ts-mod
-      cmake-ts-mode)
-     . lsp-deferred)
-    :commands (lsp lsp-deferred))
+    ((c-ts-mode
+      c++-ts-mode)
+     . eglot-ensure)
+    :config
+    (add-to-list 'eglot-server-programs
+                 '((c++-ts-mode c-ts-mode) . ("clangd")))
+    )
 
 (use-package treesit
     :init
@@ -116,12 +113,6 @@
     (add-to-list 'major-mode-remap-alist
                  '(js-json-mode . json-ts-mode))
     )
-
-(use-package flycheck
-    :ensure t
-    :hook ((after-init . global-flycheck-mode))
-    :init
-    (setq global-flycheck-lsp-mode t))
 
 (setq-default smtpmail-smtp-server "smtp.gmail.com"
               smtpmail-smtp-service 587
