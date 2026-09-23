@@ -1,10 +1,14 @@
 Host dotfile
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/dotfile
+     HostName github.com
+     User git
+     IdentityFile ~/.ssh/dotfile
 
-Host ubuntu
-     HostName 8.218.161.22
+Host tencent
+     HostName 43.163.208.217
      User root
-     Port 22
-     IdentityFile ~/.ssh/aliyun
+     IdentityFile ~/.ssh/tencent
+
+Host tutorial
+     HostName github.com
+     User git
+     IdentityFile ~/.ssh/tutorial
