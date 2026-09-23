@@ -63,7 +63,7 @@
     :ensure t
     :defer t
     :config
-    (setq vterm-timer-delay 0.0069))
+    (setq vterm-timer-delay 0.00417))
 
 (use-package color-theme-sanityinc-tomorrow
     :ensure t
@@ -85,7 +85,8 @@
     :ensure nil
     :hook
     ((c-ts-mode
-      c++-ts-mode)
+      c++-ts-mode
+      )
      . eglot-ensure)
     :config
     (add-to-list 'eglot-server-programs
