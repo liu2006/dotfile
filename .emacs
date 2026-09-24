@@ -44,7 +44,7 @@
 
 (set-face-attribute 'default nil
                     :family "CodeNewRomanNerdFont"
-                    :height 120
+                    :height 170
                     :width 'regular)
 
 (use-package multiple-cursors
@@ -63,7 +63,7 @@
     :ensure t
     :defer t
     :config
-    (setq vterm-timer-delay 0.00417))
+    (setq vterm-timer-delay 0.017))
 
 (use-package color-theme-sanityinc-tomorrow
     :ensure t
@@ -85,8 +85,7 @@
     :ensure nil
     :hook
     ((c-ts-mode
-      c++-ts-mode
-      )
+      c++-ts-mode)
      . eglot-ensure)
     :config
     (add-to-list 'eglot-server-programs
@@ -131,5 +130,4 @@
 
 (provide '.emacs)
 ;;; .emacs ends here
-
 
