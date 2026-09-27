@@ -38,13 +38,13 @@
 (setq-default whitespace-style
               '(face spaces space-mark))
 
-(setq-default c-ts-indent-offset 4
+(setq-default c-basic-offset 4
               cmake-ts-indent-offset 4
               lisp-body-indent 4)
 
 (set-face-attribute 'default nil
                     :family "CodeNewRomanNerdFont"
-                    :height 170
+                    :height 180
                     :width 'regular)
 
 (use-package multiple-cursors
@@ -84,34 +84,16 @@
 (use-package eglot
     :ensure nil
     :hook
-    ((c-ts-mode
-      c++-ts-mode)
+    ((c-mode
+      c++-mode)
      . eglot-ensure)
     :config
     (add-to-list 'eglot-server-programs
-                 '((c++-ts-mode c-ts-mode) . ("clangd")))
-    )
-
-(use-package treesit
-    :init
-    (setq treesit-language-source-alist
-          '((c "https://github.com/tree-sitter/tree-sitter-c")
-            (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-            (bash "https://github.com/tree-sitter/tree-sitter-bash")
-            (html "https://github.com/tree-sitter/tree-sitter-html")
-            (json "https://github.com/tree-sitter/tree-sitter-json")
-            ))
-    (setq treesit-font-lock-level 4)
-    (add-to-list 'major-mode-remap-alist
-                 '(c-mode . c-ts-mode))
-    (add-to-list 'major-mode-remap-alist
-                 '(c++-mode . c++-ts-mode))
-    (add-to-list 'major-mode-remap-alist
-                 '(sh-mode . bash-ts-mode))
-    (add-to-list 'major-mode-remap-alist
-                 '(mhtml-mode . html-ts-mode))
-    (add-to-list 'major-mode-remap-alist
-                 '(js-json-mode . json-ts-mode))
+                 '((c++-mode c-mode) . ("clangd")))
+    (add-hook 'eglot-managed-mode-hook
+              (lambda()
+                  (eglot-inlay-hints-mode 0)
+                  (eglot-semantic-tokens-mode 1)))
     )
 
 (setq-default smtpmail-smtp-server "smtp.gmail.com"
