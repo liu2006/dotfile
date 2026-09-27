@@ -22,14 +22,6 @@
 (menu-bar-mode 0)
 (scroll-bar-mode 0)
 
-(use-package ido
-    :ensure nil
-    :init
-    (setq ido-enable-flex-matching t
-          ido-everywhere t)
-    :config
-    (ido-mode 1))
-
 (global-display-line-numbers-mode 1)
 (setq-default display-line-numbers-type 'relative)
 (setq inhibit-startup-screen t)
@@ -38,14 +30,18 @@
 (setq-default whitespace-style
               '(face spaces space-mark))
 
-(setq-default c-basic-offset 4
-              cmake-ts-indent-offset 4
-              lisp-body-indent 4)
-
 (set-face-attribute 'default nil
                     :family "CodeNewRomanNerdFont"
                     :height 180
                     :width 'regular)
+
+(use-package ido
+    :ensure nil
+    :init
+    (setq ido-enable-flex-matching t
+          ido-everywhere t)
+    :config
+    (ido-mode 1))
 
 (use-package multiple-cursors
     :ensure t
@@ -81,15 +77,39 @@
     :bind (("M-x" . 'smex)
            ("M-X" . 'smex-major-mode-commands)))
 
+(use-package cmake-mode
+    :defer t
+    :ensure t
+    :custom
+    (cmake-tab-width 4)
+    )
+
+(use-package c++-mode
+    :defer t
+    :ensure nil
+    :custom
+    (c-basic-offset 4))
+
+(use-package emacs-lisp-mode
+    :defer t
+    :ensure nil
+    :custom
+    (lisp-body-indent 4))
+;; (setq-default 
+;;               lisp-body-indent 4)
+
 (use-package eglot
     :ensure nil
     :hook
     ((c-mode
-      c++-mode)
+      c++-mode
+      cmake-mode)
      . eglot-ensure)
     :config
     (add-to-list 'eglot-server-programs
                  '((c++-mode c-mode) . ("clangd")))
+    (add-to-list 'eglot-server-programs
+                 '((cmake-mode) . ("cmake-language-server")))
     (add-hook 'eglot-managed-mode-hook
               (lambda()
                   (eglot-inlay-hints-mode 0)
