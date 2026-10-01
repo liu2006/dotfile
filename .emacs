@@ -1,135 +1,110 @@
-;;; .emacs --- Emacs configuration file  -*- lexical-binding: t; -*-
-
-;;; Commentary:
-
-;;; Code:
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
-
-(unless (file-exists-p "~/.emacs.d/backups")
-    (make-directory "~/.emacs.d/backups" t))
-(add-to-list 'backup-directory-alist (cons "." "~/.emacs.d/backups/"))
-
-(setq custom-file "~/.emacs.d/.custom.el")
-(unless (file-exists-p custom-file)
-    (with-temp-buffer
-        (write-file custom-file)))
-(load custom-file)
-
-(column-number-mode 1)
+;; -*- lexical-binding: t; -*-
+(setq inhibit-startup-screen t)
 (tool-bar-mode 0)
 (menu-bar-mode 0)
 (scroll-bar-mode 0)
-
+(ido-mode 1)
+(setq ido-enable-flex-matching t)
+(setq ido-everywhere t)
 (global-display-line-numbers-mode 1)
 (setq-default display-line-numbers-type 'relative)
-(setq inhibit-startup-screen t)
-(setq-default tab-width 4)
-(setq-default indent-tabs-mode nil)
-(setq-default whitespace-style
-              '(face spaces space-mark))
-
 (set-face-attribute 'default nil
                     :family "CodeNewRomanNerdFont"
-                    :height 180
+                    :height 190
                     :width 'regular)
 
-(use-package ido
-    :ensure nil
-    :init
-    (setq ido-enable-flex-matching t
-          ido-everywhere t)
-    :config
-    (ido-mode 1))
+(add-to-list 'load-path "~/.emacs.local/themes")
 
-(use-package multiple-cursors
-    :ensure t
-    :defer t
-    :bind (("C-S-c C-S-c" . mc/edit-lines)
-           ("C->" . mc/mark-next-like-this)
-           ("C-<" . mc/mark-previous-like-this)
-           ("C-c C-<" . mc/mark-all-like-this)))
+(add-to-list 'custom-theme-load-path
+             "~/.emacs.local/themes")
+(load-theme 'sanityinc-tomorrow-night t)
+
+(add-to-list 'load-path "~/.emacs.local/smex")
+(require 'smex)
+(smex-initialize)
+(global-set-key (kbd "M-x") 'smex)
+(global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
 (use-package magit
-    :ensure t
-    :defer t)
+  :ensure t
+  )
 
-(use-package vterm
-    :ensure t
-    :defer t
-    :config
-    (setq vterm-timer-delay 0.017))
+(use-package multiple-cursors
+  :defer t)
+(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 
-(use-package color-theme-sanityinc-tomorrow
-    :ensure t
-    :config
-    (load-theme 'sanityinc-tomorrow-night t))
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+	(c "https://github.com/tree-sitter/tree-sitter-c")
+	(c++ "https://github.com/tree-sitter/tree-sitter-cpp")
+	(cmake "https://github.com/uyha/tree-sitter-cmake")
+	(css "https://github.com/tree-sitter/tree-sitter-css")
+	(html "https://github.com/tree-sitter/tree-sitter-html")
+	(json "https://github.com/tree-sitter/tree-sitter-json")
+	(toml "https://github.com/tree-sitter/tree-sitter-toml")
+	(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-(use-package doom-modeline
-    :ensure t
-    :config
-    (doom-modeline-mode 1))
+(setq major-mode-remap-alist
+      '((yaml-mode . yaml-ts-mode)
+	(html-mode . html-ts-mode)
+	(sh-mode . bash-ts-mode)
+	(c-mode . c-ts-mode)
+	(c++-mode . c++-ts-mode)
+	(json-mode . json-ts-mode)
+	(cmake-mode . cmake-ts-mode)
+	(css-mode . css-ts-mode)))
 
-(use-package smex
-    :ensure t
-    :defer t
-    :bind (("M-x" . 'smex)
-           ("M-X" . 'smex-major-mode-commands)))
+;; (customize-set-variable 'treesit-font-lock-level 4)
 
-(use-package cmake-mode
-    :defer t
-    :ensure t
-    :custom
-    (cmake-tab-width 4)
-    )
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               '((c-ts-mode c++-ts-mode) . ("clangd")))
+  (add-to-list 'eglot-server-programs
+               '(bash-ts-mode . ("bash-language-server")))
+  (add-to-list 'eglot-server-programs
+               '(cmake-ts-mode . ("cmake-language-server")))
+  (add-to-list 'eglot-server-programs
+               '(yaml-ts-mode . ("yaml-language-server")))
+  (add-to-list 'eglot-server-programs
+               '(json-ts-mode . ("vscode-langservers-extracted")))
+  (add-to-list 'eglot-server-programs
+               '(css-ts-mode . ("vscode-langservers-extracted")))
+  (add-to-list 'eglot-server-programs
+               '(html-ts-mode . ("vscode-langservers-extracted")))
+  
+  )
 
-(use-package c++-mode
-    :defer t
-    :ensure nil
-    :custom
-    (c-basic-offset 4))
+(add-hook 'c-ts-mode-hook 'eglot-ensure)
+(add-hook 'c++-ts-mode-hook 'eglot-ensure)
+(add-hook 'cmake-ts-mode-hook 'eglot-ensure)
+(add-hook 'css-ts-mode-hook 'eglot-ensure)
+(add-hook 'html-ts-mode-hook 'eglot-ensure)
+(add-hook 'json-ts-mode-hook 'eglot-ensure)
+(add-hook 'taml-ts-mode-hook 'eglot-ensure)
 
-(use-package emacs-lisp-mode
-    :defer t
-    :ensure nil
-    :custom
-    (lisp-body-indent 4))
-;; (setq-default 
-;;               lisp-body-indent 4)
+(add-hook 'eglot-managed-mode-hook
+          (lambda ()
+            (eglot-inlay-hints-mode 0)))
 
-(use-package eglot
-    :ensure nil
-    :hook
-    ((c-mode
-      c++-mode
-      cmake-mode)
-     . eglot-ensure)
-    :config
-    (add-to-list 'eglot-server-programs
-                 '((c++-mode c-mode) . ("clangd")))
-    (add-to-list 'eglot-server-programs
-                 '((cmake-mode) . ("cmake-language-server")))
-    (add-hook 'eglot-managed-mode-hook
-              (lambda()
-                  (eglot-inlay-hints-mode 0)
-                  (eglot-semantic-tokens-mode 1)))
-    )
+(use-package company
+  :ensure t
+  )
+(add-hook 'after-init-hook 'global-company-mode)
+(setq company-idle-delay nil)
+(global-set-key (kbd "M-TAB") 'company-complete)
 
-(setq-default smtpmail-smtp-server "smtp.gmail.com"
-              smtpmail-smtp-service 587
-              smtpmail-stream-type 'starttls)
-
-(setq user-mail-address "liuhongshun80@gmail.com"
-      user-full-name "pop")
-
-(setq-default message-send-mail-function 'smtpmail-send-it)
-(setq auth-sources '("~/.authinfo"))
-
-(put 'dired-find-alternate-file 'disabled nil)
-(put 'set-goal-column 'disabled nil)
-(put 'upcase-region 'disabled nil)
-
-(provide '.emacs)
-;;; .emacs ends here
-
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages '(magit multiple-cursors)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
