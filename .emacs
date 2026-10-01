@@ -25,6 +25,8 @@
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
+(setq c-ts-indent-offset 4)
+
 (use-package magit
   :ensure t
   )
