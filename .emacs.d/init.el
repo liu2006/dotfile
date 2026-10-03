@@ -10,29 +10,35 @@
 (setq-default display-line-numbers-type 'relative)
 (set-face-attribute 'default nil
                     :family "CodeNewRomanNerdFont"
-                    :height 190
+                    :height 220
                     :width 'regular)
+(setq c-ts-indent-offset 4)
 
-(add-to-list 'load-path "~/.emacs.local/themes")
-
+(add-to-list 'load-path "~/.emacs.d/packages/color-theme-sanityinc-tomorrow")
 (add-to-list 'custom-theme-load-path
-             "~/.emacs.local/themes")
+             "~/.emacs.d/packages/color-theme-sanityinc-tomorrow")
 (load-theme 'sanityinc-tomorrow-night t)
 
-(add-to-list 'load-path "~/.emacs.local/smex")
+(add-to-list 'load-path "~/.emacs.d/packages/smex")
 (require 'smex)
 (smex-initialize)
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
-(setq c-ts-indent-offset 4)
+(add-to-list 'load-path "~/.emacs.d/packages/company-mode")
+(require 'company)
+(add-hook 'after-init-hook 'global-company-mode)
+(setq company-idle-delay nil)
+(global-set-key (kbd "M-TAB") 'company-complete)
 
-(use-package magit
-  :ensure t
-  )
+(add-to-list 'load-path "~/.emacs.d/packages/cond-let")
+(add-to-list 'load-path "~/.emacs.d/packages/llama")
+(add-to-list 'load-path "~/.emacs.d/packages/with-editor/lisp")
+(add-to-list 'load-path "~/.emacs.d/packages/magit/lisp")
+(require 'magit)
 
-(use-package multiple-cursors
-  :defer t)
+(add-to-list 'load-path "~/.emacs.d/packages/multiple-cursors.el")
+(require 'multiple-cursors)
 (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
 (global-set-key (kbd "C->") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
@@ -59,7 +65,7 @@
 	(cmake-mode . cmake-ts-mode)
 	(css-mode . css-ts-mode)))
 
-;; (customize-set-variable 'treesit-font-lock-level 4)
+(customize-set-variable 'treesit-font-lock-level 4)
 
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
@@ -91,22 +97,3 @@
           (lambda ()
             (eglot-inlay-hints-mode 0)))
 
-(use-package company
-  :ensure t
-  )
-(add-hook 'after-init-hook 'global-company-mode)
-(setq company-idle-delay nil)
-(global-set-key (kbd "M-TAB") 'company-complete)
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages '(magit multiple-cursors)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
