@@ -10,7 +10,7 @@
 (setq-default display-line-numbers-type 'relative)
 (set-face-attribute 'default nil
                     :family "CodeNewRomanNerdFont"
-                    :height 220
+                    :height 180
                     :width 'regular)
 (setq c-ts-indent-offset 4)
 
@@ -25,7 +25,9 @@
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
+(add-to-list 'load-path "~/.emacs.d/packages/posframe")
 (add-to-list 'load-path "~/.emacs.d/packages/company-mode")
+(require 'company-childframe)
 (require 'company)
 (add-hook 'after-init-hook 'global-company-mode)
 (setq company-idle-delay nil)
