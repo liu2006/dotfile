@@ -1,0 +1,9 @@
+[general]
+live_config_reload = true
+
+[window]
+decorations = "None"
+
+[font]
+normal = { family = "CodeNewRomanNerdFont", style = "Regular" }
+size = 14

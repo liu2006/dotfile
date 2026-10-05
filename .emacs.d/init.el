@@ -10,9 +10,17 @@
 (setq-default display-line-numbers-type 'relative)
 (set-face-attribute 'default nil
                     :family "CodeNewRomanNerdFont"
+<<<<<<< HEAD
                     :height 180
+=======
+                    :height 150
+>>>>>>> 8f0c046 (update)
                     :width 'regular)
 (setq c-ts-indent-offset 4)
+
+(add-to-list 'load-path "~/.emacs.d/packages/slang-mode")
+(require 'slang-mode)
+(add-to-list 'auto-mode-alist '("\\.slang\\'" . slang-mode))
 
 (add-to-list 'load-path "~/.emacs.d/packages/color-theme-sanityinc-tomorrow")
 (add-to-list 'custom-theme-load-path
