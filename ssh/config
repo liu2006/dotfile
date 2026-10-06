@@ -7,8 +7,3 @@ Host tunnel
      HostName 43.163.208.217
      User root
      IdentityFile ~/.ssh/tunnel
-
-Host tutorial
-     HostName github.com
-     User git
-     IdentityFile ~/.ssh/tutorial
