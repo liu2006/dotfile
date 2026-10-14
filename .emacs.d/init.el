@@ -14,9 +14,11 @@
                     :width 'regular)
 (setq c-ts-indent-offset 4)
 
-;; Change origin
-;; (setq package-archives '(("gnu" . "https://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-;;                          ("nongnu" . "https://mirrors.tuna.tsinghua.edu.cn/elpa/nongnu/")))
+;; Install vterm
+(unless (package-installed-p 'vterm)
+	(package-vc-install
+	 '(vterm :url "https://github.com/emacsmirror/vterm.git")))
+(setq vterm-timer-delay nil)
 
 ;; Install slang-mode
 (unless (package-installed-p 'slang-mode)
@@ -28,15 +30,13 @@
 ;; Install color-theme-sanityinc-tomorrow
 (unless (package-installed-p 'color-theme-sanityinc-tomorrow)
   (package-vc-install
-   '(color-theme-sanityinc-tomorrow :url "https://github.com/purcell/color-theme-sanityinc-tomorrow.git"))
-  )
+   '(color-theme-sanityinc-tomorrow :url "https://github.com/purcell/color-theme-sanityinc-tomorrow.git")))
 (load-theme 'sanityinc-tomorrow-night t)
 
 ;;Install smex
 (unless (package-installed-p 'smex)
     (package-vc-install
-     '(smex :url "https://github.com/nonsequitur/smex.git"))
-    )
+     '(smex :url "https://github.com/nonsequitur/smex.git")))
 (require 'smex)
 (smex-initialize)
 (global-set-key (kbd "M-x") 'smex)
@@ -127,14 +127,14 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(magit multiple-cursors))
+ '(package-selected-packages
+   '(color-theme-sanityinc-tomorrow company-mode doom-modeline eat magit
+				    multiple-cursors slang-mode smex
+				    vterm))
  '(package-vc-selected-packages
-   '((company-mode :url
-		   "https://github.com/company-mode/company-mode.git")
-     (smex :url "https://github.com/nonsequitur/smex.git")
-     (color-theme-sanityinc-tomorrow :url
-				     "https://github.com/purcell/color-theme-sanityinc-tomorrow.git")
-     (slang-mode :url "https://github.com/K1ngst0m/slang-mode.git"))))
+   '((vterm :url "https://github.com/emacsmirror/vterm.git")
+     (doom-modeline :url
+		    "https://github.com/seagle0128/doom-modeline.git"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
