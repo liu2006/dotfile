@@ -14,26 +14,53 @@
                     :width 'regular)
 (setq c-ts-indent-offset 4)
 
-;; Install vterm
+;; Install vterm package
 (unless (package-installed-p 'vterm)
 	(package-vc-install
 	 '(vterm :url "https://github.com/emacsmirror/vterm.git")))
 (setq vterm-timer-delay nil)
 
-;; Install slang-mode
+;; Install the dependency f package for doom-modeline
+(unless (package-installed-p 'f)
+	(package-vc-install
+ 	 '(f :url "https://github.com/rejeep/f.el.git")))
+(add-to-list 'load-path "~/.emacs.d/elpa/f")
+
+;; Install the dependency s package for doom-modeline
+(unless (package-installed-p 's)
+	(package-vc-install
+ 	 '(s :url "https://github.com/magnars/s.el.git")))
+(add-to-list 'load-path "~/.emacs.d/elpa/s")
+
+;; Install the dependency shrink-path package for doom-modeline
+(unless (package-installed-p 'shrink-path)
+	(package-vc-install
+ 	 '(shrink-path :url "https://github.com/emacsmirror/shrink-path.git")))
+(add-to-list 'load-path "~/.emacs.d/elpa/shrink-path")
+
+;; Install modeline package
+(unless (package-installed-p 'doom-modeline)
+	(package-vc-install
+ 	 '(doom-modeline :url "https://github.com/seagle0128/doom-modeline.git")))
+(add-to-list 'load-path "~/.emacs.d/elpa/doom-modeline")
+(require 'doom-modeline)
+(setq nerd-icons-font-family "CodeNewRomanNerdFont")
+(doom-modeline-mode 1)
+
+;; Install slang-mode package
 (unless (package-installed-p 'slang-mode)
 	(package-vc-install
 	 '(slang-mode :url "https://github.com/K1ngst0m/slang-mode.git")))
 (require 'slang-mode)
 (add-to-list 'auto-mode-alist '("\\.slang\\'" . slang-mode))
 
-;; Install color-theme-sanityinc-tomorrow
+;; Install color-theme-sanityinc-tomorrow package
 (unless (package-installed-p 'color-theme-sanityinc-tomorrow)
   (package-vc-install
    '(color-theme-sanityinc-tomorrow :url "https://github.com/purcell/color-theme-sanityinc-tomorrow.git")))
 (load-theme 'sanityinc-tomorrow-night t)
 
-;;Install smex
+;;Install smex package
 (unless (package-installed-p 'smex)
     (package-vc-install
      '(smex :url "https://github.com/nonsequitur/smex.git")))
@@ -42,7 +69,7 @@
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "M-X") 'smex-major-mode-commands)
 
-;; Install company-mode
+;; Install company-mode package
 (unless (package-installed-p 'company-mode)
   (package-vc-install 
    '(company-mode :url "https://github.com/company-mode/company-mode.git")))
@@ -51,13 +78,13 @@
 (setq company-idle-delay nil)
 (global-set-key (kbd "M-TAB") 'company-complete)
 
-;; Install magit 
+;; Install magit package
 (unless (package-installed-p 'magit)
   (package-vc-install
    '(magit :url "https://github.com/magit/magit.git")))
 (require 'magit)
 
-;; Install multiple-cursor 
+;; Install multiple-cursor package
 (unless (package-installed-p 'multiple-cursors)
   (package-vc-install
    '(multiple-cursors :url "https://github.com/magnars/multiple-cursors.el.git")))
@@ -127,14 +154,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(color-theme-sanityinc-tomorrow company-mode doom-modeline eat magit
-				    multiple-cursors slang-mode smex
-				    vterm))
  '(package-vc-selected-packages
-   '((vterm :url "https://github.com/emacsmirror/vterm.git")
-     (doom-modeline :url
-		    "https://github.com/seagle0128/doom-modeline.git"))))
+   '((shrink-path :url "https://github.com/emacsmirror/shrink-path.git"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
