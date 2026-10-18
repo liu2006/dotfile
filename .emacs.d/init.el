@@ -94,16 +94,14 @@
 (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 
-(setq treesit-language-source-alist
-      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-	(c "https://github.com/tree-sitter/tree-sitter-c")
-	(c++ "https://github.com/tree-sitter/tree-sitter-cpp")
-	(cmake "https://github.com/uyha/tree-sitter-cmake")
-	(css "https://github.com/tree-sitter/tree-sitter-css")
-	(html "https://github.com/tree-sitter/tree-sitter-html")
-	(json "https://github.com/tree-sitter/tree-sitter-json")
-	(toml "https://github.com/tree-sitter/tree-sitter-toml")
-	(yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+;; Install treesit-auto package
+(unless (package-installed-p 'treesit-auto)
+  (package-vc-install
+   '(treesit-auto :url "https://github.com/renzmann/treesit-auto.git")))
+(require 'treesit-auto)
+(treesit-auto-add-to-auto-mode-alist 'all)
+(global-treesit-auto-mode 1)
+(setq treesit-auto-install 't)
 
 (setq major-mode-remap-alist
       '((yaml-mode . yaml-ts-mode)
@@ -154,8 +152,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(package-selected-packages '(treesit-auto))
  '(package-vc-selected-packages
-   '((shrink-path :url "https://github.com/emacsmirror/shrink-path.git"))))
+   '((treesit-auto :url "https://github.com/renzmann/treesit-auto.git")
+     (shrink-path :url
+		  "https://github.com/emacsmirror/shrink-path.git"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
