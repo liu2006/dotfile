@@ -10,6 +10,7 @@
 (setq ido-everywhere t)
 (global-display-line-numbers-mode 1)
 (setq-default display-line-numbers-type 'relative)
+(setq ring-bell-function 'ignore)
 (set-face-attribute 'default nil
                     :family "CodeNewRomanNerdFont"
                     :height 150
