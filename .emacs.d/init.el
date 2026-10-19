@@ -4,6 +4,8 @@
 (menu-bar-mode 0)
 (scroll-bar-mode 0)
 (ido-mode 1)
+(line-number-mode 1)
+(column-number-mode 1)
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (global-display-line-numbers-mode 1)
@@ -12,8 +14,8 @@
                     :family "CodeNewRomanNerdFont"
                     :height 150
                     :width 'regular)
-(setq c-ts-indent-offset 4)
 
+(setq c-ts-indent-offset 4)
 ;; Install vterm package
 (unless (package-installed-p 'vterm)
 	(package-vc-install
