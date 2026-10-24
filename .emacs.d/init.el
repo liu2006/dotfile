@@ -17,34 +17,39 @@
                     :width 'regular)
 
 (setq c-ts-indent-offset 4)
+
+(require 'ansi-color)
+(add-hook 'compilation-filter-hook
+          #'ansi-color-compilation-filter)
+
 ;; Install vterm package
 (unless (package-installed-p 'vterm)
-	(package-vc-install
-	 '(vterm :url "https://github.com/emacsmirror/vterm.git")))
+  (package-vc-install
+   '(vterm :url "https://github.com/emacsmirror/vterm.git")))
 (setq vterm-timer-delay nil)
 
 ;; Install the dependency f package for doom-modeline
 (unless (package-installed-p 'f)
-	(package-vc-install
- 	 '(f :url "https://github.com/rejeep/f.el.git")))
+  (package-vc-install
+   '(f :url "https://github.com/rejeep/f.el.git")))
 (add-to-list 'load-path "~/.emacs.d/elpa/f")
 
 ;; Install the dependency s package for doom-modeline
 (unless (package-installed-p 's)
-	(package-vc-install
- 	 '(s :url "https://github.com/magnars/s.el.git")))
+  (package-vc-install
+   '(s :url "https://github.com/magnars/s.el.git")))
 (add-to-list 'load-path "~/.emacs.d/elpa/s")
 
 ;; Install the dependency shrink-path package for doom-modeline
 (unless (package-installed-p 'shrink-path)
-	(package-vc-install
- 	 '(shrink-path :url "https://github.com/emacsmirror/shrink-path.git")))
+  (package-vc-install
+   '(shrink-path :url "https://github.com/emacsmirror/shrink-path.git")))
 (add-to-list 'load-path "~/.emacs.d/elpa/shrink-path")
 
 ;; Install modeline package
 (unless (package-installed-p 'doom-modeline)
-	(package-vc-install
- 	 '(doom-modeline :url "https://github.com/seagle0128/doom-modeline.git")))
+  (package-vc-install
+   '(doom-modeline :url "https://github.com/seagle0128/doom-modeline.git")))
 (add-to-list 'load-path "~/.emacs.d/elpa/doom-modeline")
 (require 'doom-modeline)
 (setq nerd-icons-font-family "CodeNewRomanNerdFont")
@@ -52,8 +57,8 @@
 
 ;; Install slang-mode package
 (unless (package-installed-p 'slang-mode)
-	(package-vc-install
-	 '(slang-mode :url "https://github.com/K1ngst0m/slang-mode.git")))
+  (package-vc-install
+   '(slang-mode :url "https://github.com/K1ngst0m/slang-mode.git")))
 (require 'slang-mode)
 (add-to-list 'auto-mode-alist '("\\.slang\\'" . slang-mode))
 
@@ -65,8 +70,8 @@
 
 ;;Install smex package
 (unless (package-installed-p 'smex)
-    (package-vc-install
-     '(smex :url "https://github.com/nonsequitur/smex.git")))
+  (package-vc-install
+   '(smex :url "https://github.com/nonsequitur/smex.git")))
 (require 'smex)
 (smex-initialize)
 (global-set-key (kbd "M-x") 'smex)
@@ -145,6 +150,7 @@
 (add-hook 'json-ts-mode-hook 'eglot-ensure)
 (add-hook 'yaml-ts-mode-hook 'eglot-ensure)
 (add-hook 'slang-mode-hook 'eglot-ensure)
+(add-hook 'make-ts-mode-hook 'eglot-ensure)
 
 (add-hook 'eglot-managed-mode-hook
           (lambda ()
@@ -159,7 +165,7 @@
  '(package-vc-selected-packages
    '((treesit-auto :url "https://github.com/renzmann/treesit-auto.git")
      (shrink-path :url
-		  "https://github.com/emacsmirror/shrink-path.git"))))
+				  "https://github.com/emacsmirror/shrink-path.git"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -167,3 +173,4 @@
  ;; If there is more than one, they won't work right.
  )
 (put 'dired-find-alternate-file 'disabled nil)
+
