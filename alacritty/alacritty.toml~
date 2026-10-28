@@ -6,4 +6,9 @@ decorations = "None"
 
 [font]
 normal = { family = "CodeNewRomanNerdFont", style = "Regular" }
-size = 14
+size = 15
+
+[cursor]
+style = { blinking = "Always" }
+
+

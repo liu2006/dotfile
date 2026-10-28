@@ -12,12 +12,11 @@
 (setq-default display-line-numbers-type 'relative)
 (setq ring-bell-function 'ignore)
 (set-face-attribute 'default nil
-                    :family "CodeNewRomanNerdFont"
+                    :family "AurulentSansMNerdFontMono"
                     :height 150
                     :width 'regular)
 
 (setq c-ts-indent-offset 4)
-
 (require 'ansi-color)
 (add-hook 'compilation-filter-hook
           #'ansi-color-compilation-filter)
@@ -52,7 +51,7 @@
    '(doom-modeline :url "https://github.com/seagle0128/doom-modeline.git")))
 (add-to-list 'load-path "~/.emacs.d/elpa/doom-modeline")
 (require 'doom-modeline)
-(setq nerd-icons-font-family "CodeNewRomanNerdFont")
+(setq nerd-icons-font-family "AurulentSansMNerdFont")
 (doom-modeline-mode 1)
 
 ;; Install slang-mode package
