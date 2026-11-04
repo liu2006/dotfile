@@ -6,15 +6,17 @@
 (ido-mode 1)
 (line-number-mode 1)
 (column-number-mode 1)
+(setq make-backup-files nil)
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (global-display-line-numbers-mode 1)
 (setq-default display-line-numbers-type 'relative)
 (setq ring-bell-function 'ignore)
+(electric-indent-mode -1)
 (set-face-attribute 'default nil
-                    :family "AurulentSansMNerdFontMono"
-                    :height 150
-                    :width 'regular)
+                    :family "CodeNewRomanNerdFont"
+                    :height 160
+                    :weight 'regular)
 
 (setq c-ts-indent-offset 4)
 (require 'ansi-color)
@@ -51,7 +53,7 @@
    '(doom-modeline :url "https://github.com/seagle0128/doom-modeline.git")))
 (add-to-list 'load-path "~/.emacs.d/elpa/doom-modeline")
 (require 'doom-modeline)
-(setq nerd-icons-font-family "AurulentSansMNerdFont")
+(setq nerd-icons-font-family "CodeNewRomanNerdFont")
 (doom-modeline-mode 1)
 
 ;; Install slang-mode package
@@ -120,40 +122,40 @@
 	(cmake-mode . cmake-ts-mode)
 	(css-mode . css-ts-mode)))
 
-(customize-set-variable 'treesit-font-lock-level 4)
+(setq treesit-font-lock-level 4)
+;; (remove-hook 'before-save-hook #'eglot-format-buffer)
+;; (with-eval-after-load 'eglot
+;;   ;; (add-to-list 'eglot-server-programs
+;;   ;;              '((c-ts-mode c++-ts-mode) . ("clangd")))
+;;   (add-to-list 'eglot-server-programs
+;;                '(bash-ts-mode . ("bash-language-server")))
+;;   (add-to-list 'eglot-server-programs
+;;                '(cmake-ts-mode . ("cmake-language-server")))
+;;   (add-to-list 'eglot-server-programs
+;;                '(yaml-ts-mode . ("yaml-language-server")))
+;;   (add-to-list 'eglot-server-programs
+;;                '(json-ts-mode . ("vscode-langservers-extracted")))
+;;   (add-to-list 'eglot-server-programs
+;;                '(css-ts-mode . ("vscode-langservers-extracted")))
+;;   (add-to-list 'eglot-server-programs
+;;                '(html-ts-mode . ("vscode-langservers-extracted")))
+;;   (add-to-list 'eglot-server-programs
+;;                '(slang-mode . ("slangd")))
+;;   )
 
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-               '((c-ts-mode c++-ts-mode) . ("clangd")))
-  (add-to-list 'eglot-server-programs
-               '(bash-ts-mode . ("bash-language-server")))
-  (add-to-list 'eglot-server-programs
-               '(cmake-ts-mode . ("cmake-language-server")))
-  (add-to-list 'eglot-server-programs
-               '(yaml-ts-mode . ("yaml-language-server")))
-  (add-to-list 'eglot-server-programs
-               '(json-ts-mode . ("vscode-langservers-extracted")))
-  (add-to-list 'eglot-server-programs
-               '(css-ts-mode . ("vscode-langservers-extracted")))
-  (add-to-list 'eglot-server-programs
-               '(html-ts-mode . ("vscode-langservers-extracted")))
-  (add-to-list 'eglot-server-programs
-               '(slang-mode . ("slangd")))
-  )
+;; (add-hook 'c-ts-mode-hook 'eglot-ensure)
+;; (add-hook 'c++-ts-mode-hook 'eglot-ensure)
+;; (add-hook 'cmake-ts-mode-hook 'eglot-ensure)
+;; (add-hook 'css-ts-mode-hook 'eglot-ensure)
+;; (add-hook 'html-ts-mode-hook 'eglot-ensure)
+;; (add-hook 'json-ts-mode-hook 'eglot-ensure)
+;; (add-hook 'yaml-ts-mode-hook 'eglot-ensure)
+;; (add-hook 'slang-mode-hook 'eglot-ensure)
+;; (add-hook 'make-ts-mode-hook 'eglot-ensure)
 
-(add-hook 'c-ts-mode-hook 'eglot-ensure)
-(add-hook 'c++-ts-mode-hook 'eglot-ensure)
-(add-hook 'cmake-ts-mode-hook 'eglot-ensure)
-(add-hook 'css-ts-mode-hook 'eglot-ensure)
-(add-hook 'html-ts-mode-hook 'eglot-ensure)
-(add-hook 'json-ts-mode-hook 'eglot-ensure)
-(add-hook 'yaml-ts-mode-hook 'eglot-ensure)
-(add-hook 'slang-mode-hook 'eglot-ensure)
-(add-hook 'make-ts-mode-hook 'eglot-ensure)
-
-(add-hook 'eglot-managed-mode-hook
-          (lambda ()
-            (eglot-inlay-hints-mode 0)))
+;; (add-hook 'eglot-managed-mode-hook
+;;           (lambda ()
+;;             (eglot-inlay-hints-mode 0)))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -173,3 +175,4 @@
  )
 (put 'dired-find-alternate-file 'disabled nil)
 
+(put 'set-goal-column 'disabled nil)
