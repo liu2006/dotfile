@@ -123,39 +123,6 @@
 	(css-mode . css-ts-mode)))
 
 (setq treesit-font-lock-level 4)
-;; (remove-hook 'before-save-hook #'eglot-format-buffer)
-;; (with-eval-after-load 'eglot
-;;   ;; (add-to-list 'eglot-server-programs
-;;   ;;              '((c-ts-mode c++-ts-mode) . ("clangd")))
-;;   (add-to-list 'eglot-server-programs
-;;                '(bash-ts-mode . ("bash-language-server")))
-;;   (add-to-list 'eglot-server-programs
-;;                '(cmake-ts-mode . ("cmake-language-server")))
-;;   (add-to-list 'eglot-server-programs
-;;                '(yaml-ts-mode . ("yaml-language-server")))
-;;   (add-to-list 'eglot-server-programs
-;;                '(json-ts-mode . ("vscode-langservers-extracted")))
-;;   (add-to-list 'eglot-server-programs
-;;                '(css-ts-mode . ("vscode-langservers-extracted")))
-;;   (add-to-list 'eglot-server-programs
-;;                '(html-ts-mode . ("vscode-langservers-extracted")))
-;;   (add-to-list 'eglot-server-programs
-;;                '(slang-mode . ("slangd")))
-;;   )
-
-;; (add-hook 'c-ts-mode-hook 'eglot-ensure)
-;; (add-hook 'c++-ts-mode-hook 'eglot-ensure)
-;; (add-hook 'cmake-ts-mode-hook 'eglot-ensure)
-;; (add-hook 'css-ts-mode-hook 'eglot-ensure)
-;; (add-hook 'html-ts-mode-hook 'eglot-ensure)
-;; (add-hook 'json-ts-mode-hook 'eglot-ensure)
-;; (add-hook 'yaml-ts-mode-hook 'eglot-ensure)
-;; (add-hook 'slang-mode-hook 'eglot-ensure)
-;; (add-hook 'make-ts-mode-hook 'eglot-ensure)
-
-;; (add-hook 'eglot-managed-mode-hook
-;;           (lambda ()
-;;             (eglot-inlay-hints-mode 0)))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
