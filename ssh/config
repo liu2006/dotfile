@@ -3,7 +3,7 @@ Host dotfile
      User git
      IdentityFile ~/.ssh/dotfile
 
-Host tunnel
-     HostName 43.163.208.217
+Host tencent
+     HostName 43.153.136.247
      User root
-     IdentityFile ~/.ssh/tunnel
+     IdentityFile ~/.ssh/tencent

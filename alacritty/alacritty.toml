@@ -5,7 +5,7 @@ live_config_reload = true
 decorations = "None"
 
 [font]
-normal = { family = "AurulentSansMNerdFontMono", style = "Regular" }
+normal = { family = "CodeNewRomanNerdFontMono", style = "Regular" }
 size = 15
 
 [cursor]
