@@ -1,4 +1,4 @@
-					; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; -*-
 (setq inhibit-startup-screen t)
 (tool-bar-mode 0)
 (menu-bar-mode 0)
