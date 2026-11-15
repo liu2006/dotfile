@@ -13,10 +13,11 @@
 (setq-default display-line-numbers-type 'relative)
 (setq ring-bell-function 'ignore)
 (electric-indent-mode -1)
-(set-face-attribute 'default nil
-                    :family "CodeNewRomanNerdFontMono"
-                    :height 210
-                    :weight 'regular)
+;; (set-face-attribute 'default nil
+;;                     :family "CodeNewRomanNerdFontMono"
+;;                     :height 160
+;;                     :weight 'regular)
+(add-to-list 'default-frame-alist '(font . "Iosevka Light-17"))
 
 (setq c-ts-indent-offset 4)
 (require 'ansi-color)
@@ -121,13 +122,22 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(color-theme-sanityinc-tomorrow company-mode magit multiple-cursors
-				    nerd-icons slang-mode smex
-				    treesit-auto))
  '(package-vc-selected-packages
-   '((doom-modeline :url
-		    "https://github.com/seagle0128/doom-modeline.git"))))
+   '((company-mode :url
+		   "https://github.com/company-mode/company-mode.git")
+     (smex :url "https://github.com/nonsequitur/smex.git")
+     (color-theme-sanityinc-tomorrow :url
+				     "https://github.com/purcell/color-theme-sanityinc-tomorrow.git")
+     (slang-mode :url "https://github.com/K1ngst0m/slang-mode.git")
+     (doom-modeline :url
+		    "https://github.com/seagle0128/doom-modeline.git")
+     (nerd-icons :url
+		 "https://github.com/rainstormstudio/nerd-icons.el.git")
+     (shrink-path :url
+		  "https://github.com/emacsmirror/shrink-path.git")
+     (s :url "https://github.com/magnars/s.el.git")
+     (f :url "https://github.com/rejeep/f.el.git")
+     (vterm :url "https://github.com/emacsmirror/vterm.git"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
