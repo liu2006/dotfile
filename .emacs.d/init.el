@@ -12,12 +12,12 @@
 (global-display-line-numbers-mode 1)
 (setq-default display-line-numbers-type 'relative)
 (setq ring-bell-function 'ignore)
-(electric-indent-mode -1)
+(electric-indent-mode 0)
 ;; (set-face-attribute 'default nil
 ;;                     :family "CodeNewRomanNerdFontMono"
 ;;                     :height 160
 ;;                     :weight 'regular)
-(add-to-list 'default-frame-alist '(font . "Iosevka Light-17"))
+(add-to-list 'default-frame-alist '(font . "Iosevka Light-18"))
 
 (setq c-ts-indent-offset 4)
 (require 'ansi-color)
@@ -104,18 +104,7 @@
 (treesit-auto-add-to-auto-mode-alist 'all)
 (global-treesit-auto-mode 1)
 (setq treesit-auto-install 't)
-
-(setq major-mode-remap-alist
-      '((yaml-mode . yaml-ts-mode)
-	(html-mode . html-ts-mode)
-	(sh-mode . bash-ts-mode)
-	(c-mode . c-ts-mode)
-	(c++-mode . c++-ts-mode)
-	(json-mode . json-ts-mode)
-	(cmake-mode . cmake-ts-mode)
-	(css-mode . css-ts-mode)))
-
-(setq treesit-font-lock-level 4)
+(setopt treesit-font-lock-level 4)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
