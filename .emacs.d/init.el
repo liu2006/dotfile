@@ -1,116 +1,99 @@
 ;; -*- lexical-binding: t; -*-
-(setq inhibit-startup-screen t)
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(setopt inhibit-startup-screen t)
 (tool-bar-mode 0)
 (menu-bar-mode 0)
 (scroll-bar-mode 0)
-(ido-mode 1)
 (line-number-mode 1)
 (column-number-mode 1)
-(setq make-backup-files nil)
-(setq ido-enable-flex-matching t)
-(setq ido-everywhere t)
+(pixel-scroll-mode 1)
+(setopt make-backup-files nil)
 (global-display-line-numbers-mode 1)
-(setq-default display-line-numbers-type 'relative)
-(setq ring-bell-function 'ignore)
+(setopt display-line-numbers-type 'relative)
+(setopt ring-bell-function 'ignore)
 (electric-indent-mode 0)
-;; (set-face-attribute 'default nil
-;;                     :family "CodeNewRomanNerdFontMono"
-;;                     :height 160
-;;                     :weight 'regular)
 (add-to-list 'default-frame-alist '(font . "Iosevka Light-18"))
 
-(setq c-ts-indent-offset 4)
-(require 'ansi-color)
+(setopt c-ts-indent-offset 4)
+
 (add-hook 'compilation-filter-hook
           #'ansi-color-compilation-filter)
 
-(unless (package-installed-p 'vterm)
-  (package-vc-install
-   '(vterm :url "https://github.com/emacsmirror/vterm.git")))
-(setq vterm-timer-delay nil)
+(global-set-key (kbd "C-x C-b") #'ibuffer)
 
-(unless (package-installed-p 'f)
-  (package-vc-install
-   '(f :url "https://github.com/rejeep/f.el.git")))
-(add-to-list 'load-path "~/.emacs.d/elpa/f")
+(setopt completion-styles '(flex basic))
 
-(unless (package-installed-p 's)
-  (package-vc-install
-   '(s :url "https://github.com/magnars/s.el.git")))
-(add-to-list 'load-path "~/.emacs.d/elpa/s")
+(setopt completion-eager-display t
+	completion-eager-update t)
 
-(unless (package-installed-p 'shrink-path)
-  (package-vc-install
-   '(shrink-path :url "https://github.com/emacsmirror/shrink-path.git")))
-(add-to-list 'load-path "~/.emacs.d/elpa/shrink-path")
+(setopt ido-enable-flex-matching t)
+(setopt ido-everywhere t)
+(ido-mode 1)
 
-(unless (package-installed-p 'nerd-icons)
-  (package-vc-install
-   '(nerd-icons :url "https://github.com/rainstormstudio/nerd-icons.el.git")))
-(setq nerd-icons-font-family "Symbols Nerd Font Mono")
+(use-package smex
+  :ensure t
+  :bind
+  (("M-x" . smex)
+   ("M-X" . smex-major-mode-commands)
+   ("C-c C-c M-x" . execute-extended-command)))
 
-(unless (package-installed-p 'doom-modeline)
-  (package-vc-install
-   '(doom-modeline :url "https://github.com/seagle0128/doom-modeline.git")))
-(add-to-list 'load-path "~/.emacs.d/elpa/doom-modeline")
-(require 'doom-modeline)
-(doom-modeline-mode 1)
+(use-package vterm
+  :ensure t
+  :config
+  (setopt vterm-timer-delay nil))
 
-(unless (package-installed-p 'slang-mode)
-  (package-vc-install
-   '(slang-mode :url "https://github.com/K1ngst0m/slang-mode.git")))
-(require 'slang-mode)
-(add-to-list 'auto-mode-alist '("\\.slang\\'" . slang-mode))
+(use-package nerd-icons
+  :ensure t
+  :config
+  (setopt nerd-icons-font-family "Symbols Nerd Font Mono"))
 
-(unless (package-installed-p 'color-theme-sanityinc-tomorrow)
-  (package-vc-install
-   '(color-theme-sanityinc-tomorrow :url "https://github.com/purcell/color-theme-sanityinc-tomorrow.git")))
-(load-theme 'sanityinc-tomorrow-night t)
+(use-package doom-modeline
+  :ensure t
+  :init
+  (doom-modeline-mode))
 
-(unless (package-installed-p 'smex)
-  (package-vc-install
-   '(smex :url "https://github.com/nonsequitur/smex.git")))
-(require 'smex)
-(smex-initialize)
-(global-set-key (kbd "M-x") 'smex)
-(global-set-key (kbd "M-X") 'smex-major-mode-commands)
+(use-package slang-mode
+  :vc (:url "https://github.com/K1ngst0m/slang-mode.git")
+  :mode "\\.slang\\'")
 
-(unless (package-installed-p 'company-mode)
-  (package-vc-install 
-   '(company-mode :url "https://github.com/company-mode/company-mode.git")))
-(require 'company)
-(add-hook 'after-init-hook 'global-company-mode)
-(setq company-idle-delay nil)
-(global-set-key (kbd "M-TAB") 'company-complete)
+(use-package color-theme-sanityinc-tomorrow
+  :ensure t
+  :config
+  (load-theme 'sanityinc-tomorrow-night t))
 
-(unless (package-installed-p 'magit)
-  (package-vc-install
-   '(magit :url "https://github.com/magit/magit.git")))
-(require 'magit)
+(use-package magit
+  :ensure t)
 
-(unless (package-installed-p 'multiple-cursors)
-  (package-vc-install
-   '(multiple-cursors :url "https://github.com/magnars/multiple-cursors.el.git")))
-(require 'multiple-cursors)
-(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
-(global-set-key (kbd "C->") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+(use-package multiple-cursors
+  :ensure t
+  :bind (("C-S-c C-S-c" . mc/edit-lines)
+	 ("C->" . mc/mark-next-like-this)
+	 ("C-<" . mc/mark-previous-like-this)
+	 ("C-c C-<" . mc/mark-all-like-this)))
 
-(unless (package-installed-p 'treesit-auto)
-  (package-vc-install
-   '(treesit-auto :url "https://github.com/renzmann/treesit-auto.git")))
-(require 'treesit-auto)
-(treesit-auto-add-to-auto-mode-alist 'all)
-(global-treesit-auto-mode 1)
-(setq treesit-auto-install 't)
-(setopt treesit-font-lock-level 4)
+(setopt treesit-enabled-modes t
+	treesit-auto-install-grammar 'always
+	treesit-font-lock-level 4)
+
+(use-package company
+  :ensure t
+  :hook
+  (after-init-hook . global-company-mode)
+  :config
+  (setopt company-idle-delay nil)
+  :bind
+  ("M-TAB" . company-complete))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(avy color-theme-sanityinc-tomorrow consult corfu doom-modeline f
+	 lsp-mode magit multiple-cursors nerd-icons s shrink-path
+	 slang-mode smex vterm))
  '(package-vc-selected-packages
    '((company-mode :url
 		   "https://github.com/company-mode/company-mode.git")
@@ -133,6 +116,3 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-(put 'dired-find-alternate-file 'disabled nil)
-
-(put 'set-goal-column 'disabled nil)
