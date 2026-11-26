@@ -12,6 +12,7 @@
 (global-display-line-numbers-mode 1)
 (setopt display-line-numbers-type 'relative)
 (setopt ring-bell-function 'ignore)
+(setq show-paren-delay 0)
 (electric-indent-mode 0)
 (add-to-list 'default-frame-alist '(font . "Iosevka Light-18"))
 
