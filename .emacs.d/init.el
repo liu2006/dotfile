@@ -1,19 +1,21 @@
 ;; -*- lexical-binding: t; -*-
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+
 (setopt inhibit-startup-screen t)
-(tool-bar-mode 0)
-(menu-bar-mode 0)
-(scroll-bar-mode 0)
-(line-number-mode 1)
-(column-number-mode 1)
-(pixel-scroll-mode 1)
-(setopt make-backup-files nil)
-(global-display-line-numbers-mode 1)
-(setopt display-line-numbers-type 'relative)
-(setopt ring-bell-function 'ignore)
-(setq show-paren-delay 0)
-(electric-indent-mode 0)
+(setopt tool-bar-mode nil)
+(setopt menu-bar-mode nil)
+(setopt	scroll-bar-mode nil)
+(setopt	line-number-mode t)
+(setopt	column-number-mode t)
+(setopt	pixel-scroll-mode t)
+(setopt	make-backup-files nil)
+(setopt	global-display-line-numbers-mode t)
+(setopt	display-line-numbers-type 'relative)
+(setopt	ring-bell-function 'ignore)
+(setopt	show-paren-delay 0)
+(setopt	electric-indent-mode nil)
+
 (add-to-list 'default-frame-alist '(font . "Iosevka Light-18"))
 
 (setopt c-ts-indent-offset 4)
@@ -28,9 +30,10 @@
 (setopt completion-eager-display t
 	completion-eager-update t)
 
-(setopt ido-enable-flex-matching t)
-(setopt ido-everywhere t)
-(ido-mode 1)
+(setopt ido-enable-flex-matching t
+	ido-everywhere t)
+
+(setopt ido-mode 'both)
 
 (use-package smex
   :ensure t
