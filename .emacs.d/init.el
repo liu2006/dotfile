@@ -42,6 +42,11 @@
    ("M-X" . smex-major-mode-commands)
    ("C-c C-c M-x" . execute-extended-command)))
 
+(use-package move-text
+  :ensure t
+  :bind (("M-n" . move-text-down)
+         ("M-p" . move-text-up)))
+
 (use-package vterm
   :ensure t
   :config
@@ -91,3 +96,18 @@
   (setopt company-idle-delay nil)
   :bind
   ("M-TAB" . company-complete))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(color-theme-sanityinc-tomorrow company company-mode doom-modeline
+				    magit move-text multiple-cursors
+				    slang-mode smex treesit-auto vterm)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
