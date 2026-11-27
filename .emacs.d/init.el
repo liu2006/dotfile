@@ -61,6 +61,9 @@
   :vc (:url "https://github.com/K1ngst0m/slang-mode.git")
   :mode "\\.slang\\'")
 
+(add-hook 'auto-mode-alist
+	  '("\\.xprofile\\'" . bash-ts-mode))
+
 (use-package color-theme-sanityinc-tomorrow
   :ensure t
   :config
